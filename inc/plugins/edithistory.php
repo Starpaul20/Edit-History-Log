@@ -1,0 +1,576 @@
+<?php
+/**
+ * Edit History Log
+ * Copyright 2010 Starpaul20
+ */
+
+// Disallow direct access to this file for security reasons
+if(!defined("IN_MYBB"))
+{
+	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
+}
+
+// Neat trick for caching our custom template(s)
+if(my_strpos($_SERVER['PHP_SELF'], 'editpost.php'))
+{
+	global $templatelist;
+	if(isset($templatelist))
+	{
+		$templatelist .= ',';
+	}
+	$templatelist .= 'editpost_reason';
+}
+
+// Tell MyBB when to run the hooks
+$plugins->add_hook("datahandler_post_update", "edithistory_run");
+$plugins->add_hook("postbit", "edithistory_postbit");
+$plugins->add_hook("editpost_end", "edithistory_edit_page");
+$plugins->add_hook("class_moderation_delete_post_start", "edithistory_delete_post");
+$plugins->add_hook("class_moderation_delete_thread_start", "edithistory_delete_thread");
+$plugins->add_hook("class_moderation_merge_threads", "edithistory_merge_thread");
+$plugins->add_hook("class_moderation_split_posts", "edithistory_split_post");
+$plugins->add_hook("fetch_wol_activity_end", "edithistory_online_activity");
+$plugins->add_hook("build_friendly_wol_location_end", "edithistory_online_location");
+
+$plugins->add_hook("admin_user_users_merge_commit", "edithistory_merge");
+$plugins->add_hook("admin_user_users_delete_commit", "edithistory_delete");
+$plugins->add_hook("admin_tools_menu_logs", "edithistory_admin_menu");
+$plugins->add_hook("admin_tools_action_handler", "edithistory_admin_action_handler");
+$plugins->add_hook("admin_tools_permissions", "edithistory_admin_permissions");
+
+// The information that shows up on the plugin manager
+function edithistory_info()
+{
+	return array(
+		"name"				=> "Edit History Log",
+		"description"		=> "Allows you to log all edits made to posts.",
+		"website"			=> "http://galaxiesrealm.com/index.php",
+		"author"			=> "Starpaul20",
+		"authorsite"		=> "http://galaxiesrealm.com/index.php",
+		"version"			=> "1.2.2",
+		"guid"				=> "b8223bbc5a67bc02ea405bcc4101a56c",
+		"compatibility"		=> "16*"
+	);
+}
+
+// This function runs when the plugin is installed.
+function edithistory_install()
+{
+	global $db;
+	$db->write_query("CREATE TABLE ".TABLE_PREFIX."edithistory (
+				eid int(10) unsigned NOT NULL auto_increment,
+				pid int(10) unsigned NOT NULL default '0',
+				tid int(10) unsigned NOT NULL default '0',
+				uid int(10) unsigned NOT NULL default '0',
+				dateline bigint(30) NOT NULL default '0',
+				originaltext text NOT NULL,
+				subject varchar(200) NOT NULL default '',
+				ipaddress varchar(30) NOT NULL default '',
+				reason varchar(200) NOT NULL default '',
+				KEY pid (pid),
+				PRIMARY KEY(eid)
+			) ENGINE=MyISAM;");
+
+	$db->add_column("posts", "reason", "varchar(200) NOT NULL default ''");
+}
+
+// Checks to make sure plugin is installed
+function edithistory_is_installed()
+{
+	global $db;
+	if($db->table_exists("edithistory"))
+	{
+		return true;
+	}
+	return false;
+}
+
+// This function runs when the plugin is uninstalled.
+function edithistory_uninstall()
+{
+	global $db;
+	if($db->table_exists("edithistory"))
+	{
+		$db->drop_table("edithistory");
+	}
+
+	if($db->field_exists("reason", "posts"))
+	{
+		$db->drop_column("posts", "reason");
+	}
+}
+
+// This function runs when the plugin is activated.
+function edithistory_activate()
+{
+	global $db;
+	$insertarray = array(
+		'name' => 'edithistory',
+		'title' => 'Edit History Settings',
+		'description' => 'Various option related to edit history (edithistory.php) can be managed and set here.',
+		'disporder' => 32,
+		'isdefault' => 0,
+	);
+	$gid = $db->insert_query("settinggroups", $insertarray);
+
+	$insertarray = array(
+		'name' => 'editmodvisibility',
+		'title' => 'Edit History Visibility',
+		'description' => 'Allows you to determine who has permission to view edit histories.',
+		'optionscode' => 'radio
+0=Admins, Super Mods and Mods
+1=Admins and Super Mods only
+2=Admins only',
+		'value' => 0,
+		'disporder' => 1,
+		'gid' => $gid
+	);
+	$db->insert_query("settings", $insertarray);
+
+	$insertarray = array(
+		'name' => 'editsperpages',
+		'title' => 'Edits Per Page',
+		'description' => 'Here you can enter the number of edits to show per page.',
+		'optionscode' => 'text',
+		'value' => 10,
+		'disporder' => 2,
+		'gid' => $gid
+	);
+	$db->insert_query("settings", $insertarray);
+
+	$insertarray = array(
+		'name' => 'edithistorychar',
+		'title' => 'Post Character Cutoff',
+		'description' => 'The number of characters needed for the post to be cut off and a link to view the full text appears.',
+		'optionscode' => 'text',
+		'value' => 500,
+		'disporder' => 3,
+		'gid' => $gid
+	);
+	$db->insert_query("settings", $insertarray);
+
+	rebuild_settings();
+
+	$insert_array = array(
+		'title'		=> 'edithistory',
+		'template'	=> $db->escape_string('<html>
+<head>
+<title>{$mybb->settings[\'bbname\']} - {$lang->edit_history}</title>
+{$headerinclude}
+</head>
+<body>
+{$header}
+{$multipage}
+<table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
+<tr>
+<td class="thead" colspan="5"><strong>{$lang->edit_history}</strong></td>
+</tr>
+<tr>
+<td class="tcat" align="center"><span class="smalltext"><strong>{$lang->edit_reason}</strong></span></td>
+<td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->edited_by}</strong></span></td>
+<td class="tcat" width="10%" align="center"><span class="smalltext"><strong>{$lang->ip_address}</strong></span></td>
+<td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->date}</strong></span></td>
+<td class="tcat" width="40%" align="center"><span class="smalltext"><strong>{$lang->original_text}</strong></span></td>
+</tr>
+{$edit_history}
+</tr>
+</table>
+{$multipage}
+{$footer}
+</body>
+</html>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	$insert_array = array(
+		'title'		=> 'edithistory_nohistory',
+		'template'	=> $db->escape_string('<tr>
+<td class="trow1" colspan="5" align="center">{$lang->no_history}</td>
+</tr>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	$insert_array = array(
+		'title'		=> 'edithistory_item',
+		'template'	=> $db->escape_string('<tr>
+<td class="{$alt_bg}" align="center">{$history[\'reason\']}</td>
+<td class="{$alt_bg}" align="center">{$history[\'username\']}</td>
+<td class="{$alt_bg}" align="center">{$history[\'ipaddress\']}</td>
+<td class="{$alt_bg}" align="center">{$dateline}</td>
+<td class="{$alt_bg}">{$originaltext}<br /><span class="smalltext">[<a href="edithistory.php?action=compare&pid={$history[\'pid\']}&eid={$history[\'eid\']}">{$lang->compare_posts}</a>]<span></td>
+</tr>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	$insert_array = array(
+		'title'		=> 'postbit_edithistory',
+		'template'	=> $db->escape_string('<span class="smalltext"><em>(<a href="edithistory.php?pid={$post[\'pid\']}">{$lang->view_edit_history}</a>)</em></span>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	$insert_array = array(
+		'title'		=> 'edithistory_comparison',
+		'template'	=> $db->escape_string('<html>
+<head>
+<title>{$mybb->settings[\'bbname\']} - {$lang->edit_history}</title>
+{$headerinclude}
+<style type="text/css">
+ins {
+background: #bfb;
+text-decoration: none;
+padding: 2px;
+}
+
+del {
+background: #fbb;
+text-decoration: none;
+padding: 2px;
+}
+</style>
+</head>
+<body>
+{$header}
+<span class="smalltext">{$lang->highlight_added}</span><br />
+<span class="smalltext">{$lang->highlight_deleted}</span><br />
+<br />
+<table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
+<tr>
+<td class="thead" colspan="5"><strong>{$lang->edit_history}</strong></td>
+</tr>
+<tr>
+<td class="tcat" width="50%"><span class="smalltext"><strong>{$lang->edit_as_of}</strong></span></td>
+<td class="tcat" width="50%"><span class="smalltext"><strong>{$lang->current_post}</strong></span></td>
+</tr>
+<tr>
+<td class="trow1" width="50%">{$comparison}</td>
+<td class="trow1" width="50%">{$post[\'message\']}</td>
+</tr>
+</table>
+{$footer}
+</body>
+</html>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	$insert_array = array(
+		'title'		=> 'edithistory_viewfull',
+		'template'	=> $db->escape_string('<html>
+<head>
+<title>{$mybb->settings[\'bbname\']} - {$lang->view_full_post}</title>
+{$headerinclude}
+</head>
+<body>
+<table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
+<tr>
+<td class="trow1" align="center">
+<strong><span class="largetext">{$lang->view_full_post}</span></strong>
+<table cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
+<tr>
+<td class="trow2"><strong>{$lang->edited_by}:</strong></td>
+<td class="trow2">{$viewfulledit[\'username\']}</td>
+</tr>
+<tr>
+<td class="trow1"><strong>{$lang->ip_address}:</strong></td>
+<td class="trow1">{$viewfulledit[\'ipaddress\']}</td>
+</tr>
+<tr>
+<td class="trow2"><strong>{$lang->subject}:</strong></td>
+<td class="trow2">{$viewfulledit[\'subject\']}</td>
+</tr>
+<tr>
+<td class="trow1"><strong>{$lang->date}:</strong></td>
+<td class="trow1">{$dateline}</td>
+</tr>
+<tr>
+<td class="trow2"><strong>{$lang->edit_reason}</strong></td>
+<td class="trow2">{$viewfulledit[\'reason\']}</td>
+</tr>
+<tr>
+<td class="trow2" colspan="2">{$originaltext}</td>
+</tr>
+</table>
+<br /><br />
+<div style="text-align: center;">
+<script type="text/javascript">
+<!--
+document.write(\'[<a href="javascript:window.close();">{$lang->close_window}</a>]\');
+// -->
+</script>
+</div>
+</td>
+</tr>
+</table>
+</body>
+</html>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	$insert_array = array(
+		'title'		=> 'editpost_reason',
+		'template'	=> $db->escape_string('<tr>
+<td class="trow2"><strong>{$lang->edit_reason}</strong></td>
+<td class="trow2"><input type="text" class="textbox" name="reason" size="40" maxlength="200" value="{$postreason}" tabindex="2" /></td>
+</tr>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	include MYBB_ROOT."/inc/adminfunctions_templates.php";
+	find_replace_templatesets("editpost", "#".preg_quote('{$posticons}')."#i", '{$reason}{$posticons}');
+	find_replace_templatesets("postbit_editedby", "#".preg_quote('{$post[\'editedprofilelink\']}.)</span>')."#i", '{$post[\'editedprofilelink\']}.<!-- editreason -->)</span>');
+	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
+	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
+
+	change_admin_permission('tools', 'edithistory');
+}
+
+// This function runs when the plugin is deactivated.
+function edithistory_deactivate()
+{
+	global $db;
+	$db->delete_query("settings", "name IN('editmodvisibility','editsperpages','edithistorychar')");
+	$db->delete_query("settinggroups", "name IN('edithistory')");
+	$db->delete_query("templates", "title IN('edithistory','edithistory_nohistory','edithistory_item','postbit_edithistory','edithistory_comparison','edithistory_viewfull','editpost_reason')");
+	rebuild_settings();
+
+	include MYBB_ROOT."/inc/adminfunctions_templates.php";
+	find_replace_templatesets("editpost", "#".preg_quote('{$reason}')."#i", '', 0);
+	find_replace_templatesets("postbit_editedby", "#".preg_quote('<!-- editreason -->')."#i", '', 0);
+	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'edithistory\']}')."#i", '', 0);
+	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'edithistory\']}')."#i", '', 0);
+
+	change_admin_permission('tools', 'edithistory', -1);
+}
+
+// Log original post when edited
+function edithistory_run()
+{
+	global $db, $mybb, $post, $session;
+	$edit = get_post($post['pid']);
+
+	// Insert original message into edit history
+	$edit_history = array(
+		"pid" => intval($edit['pid']),
+		"tid" => intval($edit['tid']),
+		"uid" => intval($mybb->user['uid']),
+		"dateline" => TIME_NOW,
+		"originaltext" => $db->escape_string($edit['message']),
+		"subject" => $db->escape_string($edit['subject']),
+		"ipaddress" => $db->escape_string($session->ipaddress),
+		"reason" => $db->escape_string($mybb->input['reason'])
+	);
+	$db->insert_query("edithistory", $edit_history);
+
+	$reason = array(
+		"reason" => $db->escape_string($mybb->input['reason']),
+	);
+	$db->update_query("posts", $reason, "pid='{$edit['pid']}'");
+}
+
+// Display log link on postbit (mods/admins only)
+function edithistory_postbit($post)
+{
+	global $db, $mybb, $lang, $templates, $fid;
+	$lang->load("edithistory");
+
+	if($post['reason'])
+	{
+		$reason = htmlspecialchars_uni($post['reason']);
+		$editreason = " <em>{$lang->edit_reason_postbit} {$reason}</em>";
+		$post = str_replace("<!-- editreason -->", $editreason, $post);
+	}
+
+	if(is_moderator($fid, "caneditposts"))
+	{
+		$query = $db->simple_select("edithistory", "pid", "pid='{$post['pid']}'", array('limit' => 1));
+		$edithistory = $db->fetch_array($query);
+
+		if($edithistory['pid'])
+		{
+			if($mybb->settings['editmodvisibility'] == "2" && $mybb->usergroup['cancp'] == 1)
+			{
+				eval("\$post['edithistory'] = \"".$templates->get("postbit_edithistory")."\";");
+			}
+			else if($mybb->settings['editmodvisibility'] == "1" && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1))
+			{
+				eval("\$post['edithistory'] = \"".$templates->get("postbit_edithistory")."\";");
+			}
+			else if($mybb->settings['editmodvisibility'] == "0")
+			{
+				eval("\$post['edithistory'] = \"".$templates->get("postbit_edithistory")."\";");
+			}
+			else
+			{
+				$post['edithistory'] = "";
+			}
+		}
+	}
+
+	return $post;
+}
+
+// Load reason on edit page
+function edithistory_edit_page()
+{
+	global $db, $lang, $mybb, $post, $templates, $post_errors, $reason, $postreason;
+	$lang->load("edithistory");
+
+	if($mybb->input['previewpost'] || $post_errors)
+	{
+		$postreason = htmlspecialchars_uni($mybb->input['reason']);
+	}
+	else
+	{
+		$postreason = htmlspecialchars_uni($post['reason']);
+	}
+
+	eval("\$reason = \"".$templates->get("editpost_reason")."\";");
+}
+
+// Delete logs if post is deleted
+function edithistory_delete_post($pid)
+{
+	global $db, $mybb;
+	$db->delete_query("edithistory", "pid='{$pid}'");
+}
+
+// Delete logs if thread is deleted
+function edithistory_delete_thread($tid)
+{
+	global $db, $mybb;
+	$db->delete_query("edithistory", "tid='{$tid}'");
+}
+
+// Update tid if threads are merged
+function edithistory_merge_thread($arguments)
+{
+	global $db, $mybb;
+	$sqlarray = array(
+		"tid" => "{$arguments['tid']}",
+	);
+	$db->update_query("edithistory", $sqlarray, "tid='{$arguments['mergetid']}'");
+}
+
+// Update tid if post(s) are split
+function edithistory_split_post($arguments)
+{
+	global $db, $mybb;
+	$pids = array_map('intval', $arguments['pids']);
+	$pids_list = implode(',', $pids);
+
+	$query = $db->simple_select("posts", "tid", "pid IN ({$pids_list})", array('limit' => 1));
+	$new_tid = $db->fetch_array($query);
+
+	$sql_array = array(
+		"tid" => "{$new_tid['tid']}",
+	);
+	$db->update_query("edithistory", $sql_array, "pid IN ({$pids_list})");
+}
+
+// Online activity
+function edithistory_online_activity($user_activity)
+{
+	global $user;
+	if(my_strpos($user['location'], "edithistory.php?action=compare") !== false)
+	{
+		$user_activity['activity'] = "edithistory_compare";
+		$user_activity['pid'] = $parameters['pid'];
+	}
+	if(my_strpos($user['location'], "edithistory.php?action=viewfull") !== false)
+	{
+		$user_activity['activity'] = "edithistory_history";
+		$user_activity['pid'] = $parameters['pid'];
+	}
+	else if(my_strpos($user['location'], "edithistory.php") !== false)
+	{
+		$user_activity['activity'] = "edithistory_history";
+		$user_activity['pid'] = $parameters['pid'];
+	}
+
+	return $user_activity;
+}
+
+function edithistory_online_location($plugin_array)
+{
+    global $db, $mybb, $lang, $parameters;
+	$lang->load("edithistory");
+
+	if($plugin_array['user_activity']['activity'] == "edithistory_compare")
+	{
+		$plugin_array['location_name'] = $lang->comparing_edit_history;
+	}
+	else if($plugin_array['user_activity']['activity'] == "edithistory_history")
+	{
+		$plugin_array['location_name'] = $lang->viewing_edit_history;
+	}
+
+	return $plugin_array;
+}
+
+// Update edit history user if users are merged
+function edithistory_merge()
+{
+	global $db, $mybb, $source_user, $destination_user;
+
+	$uid = array(
+		"uid" => $destination_user['uid']
+	);	
+	$db->update_query("edithistory", $uid, "uid='{$source_user['uid']}'");
+}
+
+// Update edit history if user is deleted
+function edithistory_delete()
+{
+	global $db, $mybb, $user;
+	$db->update_query("edithistory", array('uid' => 0), "uid='{$user['uid']}'");
+}
+
+// Admin CP log page
+function edithistory_admin_menu($sub_menu)
+{
+	global $lang;
+	$lang->load("tools_edithistory");
+
+	$sub_menu['110'] = array('id' => 'edithistory', 'title' => $lang->edit_history_log, 'link' => 'index.php?module=tools-edithistory');
+
+	return $sub_menu;
+}
+
+function edithistory_admin_action_handler($actions)
+{
+	$actions['edithistory'] = array('active' => 'edithistory', 'file' => 'edithistory.php');
+
+	return $actions;
+}
+
+function edithistory_admin_permissions($admin_permissions)
+{
+  	global $db, $mybb, $lang;
+	$lang->load("tools_edithistory");
+
+	$admin_permissions['edithistory'] = $lang->can_manage_edit_history;
+
+	return $admin_permissions;
+}
+
+?>
