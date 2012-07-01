@@ -40,4 +40,10 @@ $l['in'] = "in";
 $l['order'] = "order";
 $l['order_added'] = "Order Added";
 
+// Admin Log
+$l['admin_log_tools_edithistory_prune'] = "Pruned {4} edit histories older than {1} days";
+$l['admin_log_tools_edithistory_prune_user'] = "Pruned {4} edit histories older than {1} days for user #{2}";
+$l['admin_log_tools_edithistory_prune_thread'] = "Pruned {4} edit histories older than {1} days for thread #{3}";
+$l['admin_log_tools_edithistory_prune_user_thread'] = "Pruned {4} edit histories older than {1} days for user #{2} and thread #{3}";
+
 ?>

@@ -37,6 +37,7 @@ $plugins->add_hook("admin_user_users_delete_commit", "edithistory_delete");
 $plugins->add_hook("admin_tools_menu_logs", "edithistory_admin_menu");
 $plugins->add_hook("admin_tools_action_handler", "edithistory_admin_action_handler");
 $plugins->add_hook("admin_tools_permissions", "edithistory_admin_permissions");
+$plugins->add_hook("admin_tools_get_admin_log_action", "edithistory_admin_adminlog");
 
 // The information that shows up on the plugin manager
 function edithistory_info()
@@ -571,6 +572,31 @@ function edithistory_admin_permissions($admin_permissions)
 	$admin_permissions['edithistory'] = $lang->can_manage_edit_history;
 
 	return $admin_permissions;
+}
+
+// Admin Log display
+function edithistory_admin_adminlog($plugin_array)
+{
+	global $lang;
+	$lang->load("tools_edithistory");
+
+	if($plugin_array['lang_string'] == admin_log_tools_edithistory_prune)
+	{
+		if($plugin_array['logitem']['data'][1] && !$plugin_array['logitem']['data'][2])
+		{
+			$plugin_array['lang_string'] = admin_log_tools_edithistory_prune_user;
+		}
+		elseif($plugin_array['logitem']['data'][2] && !$plugin_array['logitem']['data'][1])
+		{
+			$plugin_array['lang_string'] = admin_log_tools_edithistory_prune_thread;
+		}
+		elseif($plugin_array['logitem']['data'][1] && $plugin_array['logitem']['data'][2])
+		{
+			$plugin_array['lang_string'] = admin_log_tools_edithistory_prune_user_thread;
+		}
+	}
+
+	return $plugin_array;
 }
 
 ?>
