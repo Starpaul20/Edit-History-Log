@@ -3,7 +3,7 @@
  * Edit History Log
  * Copyright 2010 Starpaul20
  */
- 
+
 $l['can_manage_edit_history'] = "Can manage edit history?";
 $l['edit_history_log'] = "Edit History Log";
 
@@ -20,7 +20,7 @@ $l['thread'] = "Thread:";
 $l['post'] = "Post:";
 
 $l['username'] = "Username";
-$l['date'] = "Edit Date";
+$l['edit_date'] = "Edit Date";
 $l['ipaddress'] = "IP Address";
 $l['information'] = "Information";
 $l['reason'] = "Edit Reason";

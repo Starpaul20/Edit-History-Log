@@ -23,14 +23,12 @@ $sub_tabs['prune_edit_history'] = array(
 	'description' => $lang->prune_edit_history_desc
 );
 
-$plugins->run_hooks("admin_tools_edithistory_begin");
-
 if($mybb->input['action'] == 'prune')
 {
-	$plugins->run_hooks("admin_tools_edithistory_prune");
-	
 	if($mybb->request_method == 'post')
 	{
+		$pids = array();
+
 		$where = 'dateline < '.(TIME_NOW-(intval($mybb->input['older_than'])*86400));
 
 		// Searching for entries by a particular user
@@ -45,11 +43,23 @@ if($mybb->input['action'] == 'prune')
 			$where .= " AND tid='".intval($mybb->input['tid'])."'";
 		}
 
+		$update_array = array(
+			"hashistory" => 0
+		);
+		$db->update_query("posts", $update_array);
+
 		$db->delete_query("edithistory", $where);
 		$num_deleted = $db->affected_rows();
-		
-		$plugins->run_hooks("admin_tools_edithistory_prune_commit");
-		
+
+		$query = $db->simple_select("edithistory", "pid");
+		while($history = $db->fetch_array($query))
+		{
+			$update_array = array(
+				"hashistory" => 1
+			);
+			$db->update_query("posts", $update_array, "pid='{$history['pid']}'");
+		}
+
 		// Log admin action
 		log_admin_action($mybb->input['older_than'], $mybb->input['uid'], $mybb->input['tid'], $num_deleted);
 
@@ -63,10 +73,10 @@ if($mybb->input['action'] == 'prune')
 	// Fetch filter options
 	$sortbysel[$mybb->input['sortby']] = 'selected="selected"';
 	$ordersel[$mybb->input['order']] = 'selected="selected"';
-	
+
 	$user_options[''] = $lang->all_users;
 	$user_options['0'] = '----------';
-	
+
 	$query = $db->query("
 		SELECT DISTINCT e.uid, u.username
 		FROM ".TABLE_PREFIX."edithistory e
@@ -80,7 +90,7 @@ if($mybb->input['action'] == 'prune')
 
 	$thread_options[''] = $lang->all_threads;
 	$thread_options['0'] = '----------';
-	
+
 	$query2 = $db->query("
 		SELECT DISTINCT e.tid, t.subject
 		FROM ".TABLE_PREFIX."edithistory e
@@ -106,22 +116,20 @@ if($mybb->input['action'] == 'prune')
 	$buttons[] = $form->generate_submit_button($lang->prune_edit_history);
 	$form->output_submit_wrapper($buttons);
 	$form->end();
-	
+
 	$page->output_footer();
 }
 
 if(!$mybb->input['action'])
 {
-	$plugins->run_hooks("admin_tools_edithistory_start");
-	
 	$page->output_header($lang->edit_history);
-	
+
 	$page->output_nav_tabs($sub_tabs, 'edit_history');
-	
+
 	$perpage = intval($mybb->input['perpage']);
 	if(!$perpage)
 	{
-		$perpage = $mybb->settings['threadsperpage'];
+		$perpage = intval($mybb->settings['threadsperpage']);
 	}
 
 	$where = 'WHERE 1=1';
@@ -162,7 +170,7 @@ if(!$mybb->input['action'])
 		{$where}
 	");
 	$rescount = $db->fetch_field($query, "count");
-	
+
 	// Figure out if we need to display multiple pages.
 	if($mybb->input['page'] != "last")
 	{
@@ -192,10 +200,10 @@ if(!$mybb->input['action'])
 		$start = 0;
 		$pagecnt = 1;
 	}
-	
+
 	$table = new Table;
 	$table->construct_header($lang->username, array('width' => '10%'));
-	$table->construct_header($lang->date, array("class" => "align_center", 'width' => '15%'));
+	$table->construct_header($lang->edit_date, array("class" => "align_center", 'width' => '15%'));
 	$table->construct_header($lang->ipaddress, array("class" => "align_center", 'width' => '10%'));
 	$table->construct_header($lang->information, array("class" => "align_center", 'width' => '35%'));
 	$table->construct_header($lang->reason, array("class" => "align_center", 'width' => '30%'));
@@ -234,28 +242,28 @@ if(!$mybb->input['action'])
 		$table->construct_cell($logitem['reason'], array("class" => "align_center"));
 		$table->construct_row();
 	}
-	
+
 	if($table->num_rows() == 0)
 	{
 		$table->construct_cell($lang->no_edit_history, array("colspan" => "5"));
 		$table->construct_row();
 	}
-	
+
 	$table->output($lang->edit_history);
-	
+
 	// Do we need to construct the pagination?
 	if($rescount > $perpage)
 	{
 		echo draw_admin_pagination($pagecnt, $perpage, $rescount, "index.php?module=tools-edithistory&amp;perpage=$perpage&amp;uid={$mybb->input['uid']}&amp;tid={$mybb->input['tid']}&amp;sortby={$mybb->input['sortby']}&amp;order={$order}")."<br />";
 	}
-	
+
 	// Fetch filter options
 	$sortbysel[$mybb->input['sortby']] = "selected=\"selected\"";
 	$ordersel[$mybb->input['order']] = "selected=\"selected\"";
-	
+
 	$user_options[''] = $lang->all_users;
 	$user_options['0'] = '----------';
-	
+
 	$query = $db->query("
 		SELECT DISTINCT e.uid, u.username
 		FROM ".TABLE_PREFIX."edithistory e
@@ -291,7 +299,7 @@ if(!$mybb->input['action'])
 		'username' => $lang->username,
 		'thread' => $lang->thread_subject
 	);
-	
+
 	$order_array = array(
 		'asc' => $lang->asc,
 		'desc' => $lang->desc
@@ -308,7 +316,7 @@ if(!$mybb->input['action'])
 	$buttons[] = $form->generate_submit_button($lang->filter_edit_history);
 	$form->output_submit_wrapper($buttons);
 	$form->end();
-	
+
 	$page->output_footer();
 }
 ?>

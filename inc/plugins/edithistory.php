@@ -21,6 +21,17 @@ if(my_strpos($_SERVER['PHP_SELF'], 'editpost.php'))
 	$templatelist .= 'editpost_reason';
 }
 
+// Neat trick for caching our custom template(s)
+if(my_strpos($_SERVER['PHP_SELF'], 'showthread.php'))
+{
+	global $templatelist;
+	if(isset($templatelist))
+	{
+		$templatelist .= ',';
+	}
+	$templatelist .= 'postbit_edithistory';
+}
+
 // Tell MyBB when to run the hooks
 $plugins->add_hook("datahandler_post_update", "edithistory_run");
 $plugins->add_hook("postbit", "edithistory_postbit");
@@ -58,6 +69,9 @@ function edithistory_info()
 function edithistory_install()
 {
 	global $db;
+	edithistory_uninstall();
+	$collation = $db->build_create_table_collation();
+
 	$db->write_query("CREATE TABLE ".TABLE_PREFIX."edithistory (
 				eid int(10) unsigned NOT NULL auto_increment,
 				pid int(10) unsigned NOT NULL default '0',
@@ -70,9 +84,10 @@ function edithistory_install()
 				reason varchar(200) NOT NULL default '',
 				KEY pid (pid),
 				PRIMARY KEY(eid)
-			) ENGINE=MyISAM;");
+			) ENGINE=MyISAM{$collation}");
 
 	$db->add_column("posts", "reason", "varchar(200) NOT NULL default ''");
+	$db->add_column("posts", "hashistory", "int(1) NOT NULL default '0'");
 }
 
 // Checks to make sure plugin is installed
@@ -99,12 +114,32 @@ function edithistory_uninstall()
 	{
 		$db->drop_column("posts", "reason");
 	}
+
+	if($db->field_exists("hashistory", "posts"))
+	{
+		$db->drop_column("posts", "hashistory");
+	}
 }
 
 // This function runs when the plugin is activated.
 function edithistory_activate()
 {
 	global $db;
+	// Upgrade support (from 1.2.x to 1.3)
+	if(!$db->field_exists("hashistory", "posts"))
+	{
+		$db->add_column("posts", "hashistory", "int(1) NOT NULL default '0'");
+
+		$query = $db->simple_select("edithistory", "pid");
+		while($history = $db->fetch_array($query))
+		{
+			$update_array = array(
+				"hashistory" => 1
+			);
+			$db->update_query("posts", $update_array, "pid='{$history['pid']}'");
+		}
+	}
+
 	$insertarray = array(
 		'name' => 'edithistory',
 		'title' => 'Edit History Settings',
@@ -144,7 +179,7 @@ function edithistory_activate()
 		'title' => 'Post Character Cutoff',
 		'description' => 'The number of characters needed for the post to be cut off and a link to view the full text appears.',
 		'optionscode' => 'text',
-		'value' => 500,
+		'value' => 1000,
 		'disporder' => 3,
 		'gid' => $gid
 	);
@@ -384,6 +419,7 @@ function edithistory_run()
 
 	$reason = array(
 		"reason" => $db->escape_string($mybb->input['reason']),
+		"hashistory" => 1,
 	);
 	$db->update_query("posts", $reason, "pid='{$edit['pid']}'");
 }
@@ -403,10 +439,7 @@ function edithistory_postbit($post)
 
 	if(is_moderator($fid, "caneditposts"))
 	{
-		$query = $db->simple_select("edithistory", "pid", "pid='{$post['pid']}'", array('limit' => 1));
-		$edithistory = $db->fetch_array($query);
-
-		if($edithistory['pid'])
+		if($post['hashistory'])
 		{
 			if($mybb->settings['editmodvisibility'] == "2" && $mybb->usergroup['cancp'] == 1)
 			{
