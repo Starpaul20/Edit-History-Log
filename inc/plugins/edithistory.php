@@ -318,15 +318,15 @@ padding: 2px;
 <table cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
 <tr>
 <td class="trow2"><strong>{$lang->edited_by}:</strong></td>
-<td class="trow2">{$viewfulledit[\'username\']}</td>
+<td class="trow2">{$edit[\'username\']}</td>
 </tr>
 <tr>
 <td class="trow1"><strong>{$lang->ip_address}:</strong></td>
-<td class="trow1">{$viewfulledit[\'ipaddress\']}</td>
+<td class="trow1">{$edit[\'ipaddress\']}</td>
 </tr>
 <tr>
 <td class="trow2"><strong>{$lang->subject}:</strong></td>
-<td class="trow2">{$viewfulledit[\'subject\']}</td>
+<td class="trow2">{$edit[\'subject\']}</td>
 </tr>
 <tr>
 <td class="trow1"><strong>{$lang->date}:</strong></td>
@@ -334,7 +334,7 @@ padding: 2px;
 </tr>
 <tr>
 <td class="trow2"><strong>{$lang->edit_reason}</strong></td>
-<td class="trow2">{$viewfulledit[\'reason\']}</td>
+<td class="trow2">{$edit[\'reason\']}</td>
 </tr>
 <tr>
 <td class="trow2" colspan="2">{$originaltext}</td>
@@ -386,7 +386,7 @@ function edithistory_deactivate()
 	global $db;
 	$db->delete_query("settings", "name IN('editmodvisibility','editsperpages','edithistorychar')");
 	$db->delete_query("settinggroups", "name IN('edithistory')");
-	$db->delete_query("templates", "title IN('edithistory','edithistory_nohistory','edithistory_item','postbit_edithistory','edithistory_comparison','edithistory_viewfull','editpost_reason')");
+	$db->delete_query("templates", "title IN('edithistory','edithistory_nohistory','edithistory_item','postbit_edithistory','edithistory_comparison','edithistory_view','editpost_reason')");
 	rebuild_settings();
 
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
@@ -530,7 +530,7 @@ function edithistory_online_activity($user_activity)
 		$user_activity['activity'] = "edithistory_compare";
 		$user_activity['pid'] = $parameters['pid'];
 	}
-	if(my_strpos($user['location'], "edithistory.php?action=viewfull") !== false)
+	if(my_strpos($user['location'], "edithistory.php?action=view") !== false)
 	{
 		$user_activity['activity'] = "edithistory_history";
 		$user_activity['pid'] = $parameters['pid'];
