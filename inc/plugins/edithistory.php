@@ -59,7 +59,7 @@ function edithistory_info()
 		"website"			=> "http://galaxiesrealm.com/index.php",
 		"author"			=> "Starpaul20",
 		"authorsite"		=> "http://galaxiesrealm.com/index.php",
-		"version"			=> "1.2.2",
+		"version"			=> "1.3",
 		"guid"				=> "b8223bbc5a67bc02ea405bcc4101a56c",
 		"compatibility"		=> "16*"
 	);
@@ -304,7 +304,7 @@ padding: 2px;
 	$db->insert_query("templates", $insert_array);
 
 	$insert_array = array(
-		'title'		=> 'edithistory_viewfull',
+		'title'		=> 'edithistory_view',
 		'template'	=> $db->escape_string('<html>
 <head>
 <title>{$mybb->settings[\'bbname\']} - {$lang->view_full_post}</title>

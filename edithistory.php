@@ -7,7 +7,7 @@
 define("IN_MYBB", 1);
 define('THIS_SCRIPT', 'edithistory.php');
 
-$templatelist = "edithistory,edithistory_nohistory,edithistory_item,edithistory_comparison,multipage_page_current,multipage_page,multipage_nextpage,multipage_prevpage,multipage";
+$templatelist = "edithistory,edithistory_nohistory,edithistory_item,edithistory_comparison,edithistory_view,multipage_page_current,multipage_page,multipage_nextpage,multipage_prevpage,multipage";
 
 require_once "./global.php";
 require_once MYBB_ROOT."inc/class_parser.php";
@@ -22,7 +22,7 @@ $post = get_post($pid);
 $post['subject'] = htmlspecialchars_uni($parser->parse_badwords($post['subject']));
 
 // Invalid post
-if(!$post['pid'] && $mybb->input['action'] != "viewfull")
+if(!$post['pid'] && $mybb->input['action'] != "view")
 {
 	error($lang->error_invalidpost);
 }
@@ -107,7 +107,9 @@ if($mybb->input['action'] == "compare")
 		$comparison = $lang->post_same;
 	}
 	else
-	$comparison = $renderer->render($diff);
+	{
+		$comparison = $renderer->render($diff);
+	}
 
 	$post['message'] = htmlspecialchars_uni($post['message']);
 
@@ -116,22 +118,22 @@ if($mybb->input['action'] == "compare")
 }
 
 // Viewing full text
-if($mybb->input['action'] == "viewfull")
+if($mybb->input['action'] == "view")
 {
 	$query = $db->query("
-		SELECT e.*, u.username AS user_name
+		SELECT e.*, u.username
 		FROM ".TABLE_PREFIX."edithistory e
 		LEFT JOIN ".TABLE_PREFIX."users u ON (e.uid=u.uid)
 		WHERE e.eid='".intval($mybb->input['eid'])."'
 	");
-	$viewfulledit = $db->fetch_array($query);
+	$edit = $db->fetch_array($query);
 
-	if(!$viewfulledit['eid'])
+	if(!$edit['eid'])
 	{
 		error($lang->error_no_log);
 	}
 
-	$post = get_post($viewfulledit['pid']);
+	$post = get_post($edit['pid']);
 	$forum = get_forum($post['fid']);
 
 	// Parse the post
@@ -144,19 +146,21 @@ if($mybb->input['action'] == "viewfull")
 		"filter_badwords" => 1
 	);
 
-	if(!$viewfulledit['reason'])
+	if(!$edit['reason'])
 	{
-		$viewfulledit['reason'] = $lang->na;
+		$edit['reason'] = $lang->na;
 	}
 	else
-	$viewfulledit['reason'] = htmlspecialchars_uni($viewfulledit['reason']);
+	{
+		$edit['reason'] = htmlspecialchars_uni($edit['reason']);
+	}
 
-	$originaltext = $parser->parse_message($viewfulledit['originaltext'], $fulltext_parser);
-	$dateline = my_date($mybb->settings['dateformat'], $viewfulledit['dateline']).", ".my_date($mybb->settings['timeformat'], $viewfulledit['dateline']);
-	$viewfulledit['username'] = build_profile_link($viewfulledit['user_name'], $viewfulledit['uid']);
+	$originaltext = $parser->parse_message($edit['originaltext'], $fulltext_parser);
+	$dateline = my_date($mybb->settings['dateformat'], $edit['dateline']).", ".my_date($mybb->settings['timeformat'], $edit['dateline']);
+	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
 
-	eval("\$viewfull = \"".$templates->get("edithistory_viewfull")."\";");
-	output_page($viewfull);
+	eval("\$view = \"".$templates->get("edithistory_view")."\";");
+	output_page($view);
 }
 
 // Show the edit history for this post.
@@ -173,7 +177,7 @@ if(!$mybb->input['action'])
 	}
 
 	// Figure out if we need to display multiple pages.
-	$perpage = $mybb->settings['editsperpages'];
+	$perpage = intval($mybb->settings['editsperpages']);
 	$page = intval($mybb->input['page']);
 
 	$query = $db->simple_select("edithistory", "COUNT(eid) AS history_count", "pid='{$pid}'");
@@ -198,9 +202,8 @@ if(!$mybb->input['action'])
 	$multipage = multipage($history_count, $perpage, $page, "edithistory.php?pid={$pid}");
 
 	$query = $db->query("
-		SELECT e.*, u.username AS user_name
+		SELECT e.*, u.username
 		FROM ".TABLE_PREFIX."edithistory e
-		LEFT JOIN ".TABLE_PREFIX."posts p ON (e.pid=p.pid)
 		LEFT JOIN ".TABLE_PREFIX."users u ON (e.uid=u.uid)
 		WHERE e.pid='{$pid}'
 		ORDER BY e.dateline DESC
@@ -214,9 +217,12 @@ if(!$mybb->input['action'])
 		{
 			$history['reason'] = $lang->na;
 		}
-		$history['reason'] = htmlspecialchars_uni($history['reason']);
+		else
+		{
+			$history['reason'] = htmlspecialchars_uni($history['reason']);
+		}
 
-		$history['username'] = build_profile_link($history['user_name'], $history['uid']);
+		$history['username'] = build_profile_link($history['username'], $history['uid']);
 		$dateline = my_date($mybb->settings['dateformat'], $history['dateline']).", ".my_date($mybb->settings['timeformat'], $history['dateline']);
 
 		// Sanitize post
@@ -224,10 +230,12 @@ if(!$mybb->input['action'])
 
 		if($mybb->settings['edithistorychar'] > 0 && my_strlen($history['originaltext']) > $mybb->settings['edithistorychar'])
 		{
-			$originaltext = my_substr($history['originaltext'], 0, $mybb->settings['edithistorychar']) . "... <span class=\"smalltext\">[<a href=\"javascript:MyBB.popupWindow('edithistory.php?action=viewfull&eid={$history['eid']}', 'viewfull', '400', '500') \">{$lang->view_full_post}</a>]<span>";
+			$originaltext = my_substr($history['originaltext'], 0, $mybb->settings['edithistorychar']) . "... <span class=\"smalltext\">[<a href=\"javascript:MyBB.popupWindow('edithistory.php?action=view&eid={$history['eid']}', 'view', '400', '500') \">{$lang->view_full_post}</a>]<span>";
 		}
 		else
-		$originaltext = $history['originaltext'];
+		{
+			$originaltext = $history['originaltext'];
+		}
 
 		eval("\$edit_history .= \"".$templates->get("edithistory_item")."\";");
 	}
