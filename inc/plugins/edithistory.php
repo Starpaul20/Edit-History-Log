@@ -125,6 +125,7 @@ function edithistory_uninstall()
 function edithistory_activate()
 {
 	global $db;
+
 	// Upgrade support (from 1.2.x to 1.3)
 	if(!$db->field_exists("hashistory", "posts"))
 	{
@@ -524,21 +525,34 @@ function edithistory_split_post($arguments)
 // Online activity
 function edithistory_online_activity($user_activity)
 {
-	global $user;
-	if(my_strpos($user['location'], "edithistory.php?action=compare") !== false)
+	global $user, $parameters;
+
+	$split_loc = explode(".php", $user_activity['location']);
+	if($split_loc[0] == $user['location'])
 	{
-		$user_activity['activity'] = "edithistory_compare";
-		$user_activity['pid'] = $parameters['pid'];
+		$filename = '';
 	}
-	if(my_strpos($user['location'], "edithistory.php?action=view") !== false)
+	else
 	{
-		$user_activity['activity'] = "edithistory_history";
-		$user_activity['pid'] = $parameters['pid'];
+		$filename = my_substr($split_loc[0], -my_strpos(strrev($split_loc[0]), "/"));
 	}
-	else if(my_strpos($user['location'], "edithistory.php") !== false)
+
+	switch($filename)
 	{
-		$user_activity['activity'] = "edithistory_history";
-		$user_activity['pid'] = $parameters['pid'];
+		case "edithistory":
+			if($parameters['action'] == "compare")
+			{
+				$user_activity['activity'] = "edithistory_compare";
+			}
+			elseif($parameters['action'] == "view")
+			{
+				$user_activity['activity'] = "edithistory_history";
+			}
+			else
+			{
+				$user_activity['activity'] = "edithistory_history";
+			}
+			break;
 	}
 
 	return $user_activity;
@@ -553,7 +567,7 @@ function edithistory_online_location($plugin_array)
 	{
 		$plugin_array['location_name'] = $lang->comparing_edit_history;
 	}
-	else if($plugin_array['user_activity']['activity'] == "edithistory_history")
+	elseif($plugin_array['user_activity']['activity'] == "edithistory_history")
 	{
 		$plugin_array['location_name'] = $lang->viewing_edit_history;
 	}
