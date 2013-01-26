@@ -22,7 +22,7 @@ $post = get_post($pid);
 $post['subject'] = htmlspecialchars_uni($parser->parse_badwords($post['subject']));
 
 // Invalid post
-if(!$post['pid'] && $mybb->input['action'] != "view")
+if(!$post['pid'])
 {
 	error($lang->error_invalidpost);
 }
@@ -120,9 +120,12 @@ if($mybb->input['action'] == "compare")
 // Viewing full text
 if($mybb->input['action'] == "view")
 {
+	add_breadcrumb($lang->view_full_post, "edithistory.php?action=view&pid={$pid}");
+
 	$query = $db->query("
-		SELECT e.*, u.username
+		SELECT e.*, u.username, p.fid
 		FROM ".TABLE_PREFIX."edithistory e
+		LEFT JOIN ".TABLE_PREFIX."posts p ON (e.pid=p.pid)
 		LEFT JOIN ".TABLE_PREFIX."users u ON (e.uid=u.uid)
 		WHERE e.eid='".intval($mybb->input['eid'])."'
 	");
@@ -133,8 +136,7 @@ if($mybb->input['action'] == "view")
 		error($lang->error_no_log);
 	}
 
-	$post = get_post($edit['pid']);
-	$forum = get_forum($post['fid']);
+	$forum = get_forum($edit['fid']);
 
 	// Parse the post
 	$fulltext_parser = array(
@@ -204,12 +206,12 @@ if(!$mybb->input['action'])
 	$query = $db->query("
 		SELECT e.*, u.username
 		FROM ".TABLE_PREFIX."edithistory e
+		LEFT JOIN ".TABLE_PREFIX."posts p ON (e.pid=p.pid)
 		LEFT JOIN ".TABLE_PREFIX."users u ON (e.uid=u.uid)
 		WHERE e.pid='{$pid}'
 		ORDER BY e.dateline DESC
 		LIMIT {$start}, {$perpage}
 	");
-
 	while($history = $db->fetch_array($query))
 	{
 		$alt_bg = alt_trow();

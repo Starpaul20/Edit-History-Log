@@ -200,14 +200,15 @@ function edithistory_activate()
 {$multipage}
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
 <tr>
-<td class="thead" colspan="5"><strong>{$lang->edit_history}</strong></td>
+<td class="thead" colspan="6"><strong>{$lang->edit_history}</strong></td>
 </tr>
 <tr>
 <td class="tcat" align="center"><span class="smalltext"><strong>{$lang->edit_reason}</strong></span></td>
-<td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->edited_by}</strong></span></td>
+<td class="tcat" width="10%" align="center"><span class="smalltext"><strong>{$lang->edited_by}</strong></span></td>
 <td class="tcat" width="10%" align="center"><span class="smalltext"><strong>{$lang->ip_address}</strong></span></td>
 <td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->date}</strong></span></td>
-<td class="tcat" width="40%" align="center"><span class="smalltext"><strong>{$lang->original_text}</strong></span></td>
+<td class="tcat" width="35%" align="center"><span class="smalltext"><strong>{$lang->original_text}</strong></span></td>
+<td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->options}</strong></span></td>
 </tr>
 {$edit_history}
 </tr>
@@ -225,7 +226,7 @@ function edithistory_activate()
 	$insert_array = array(
 		'title'		=> 'edithistory_nohistory',
 		'template'	=> $db->escape_string('<tr>
-<td class="trow1" colspan="5" align="center">{$lang->no_history}</td>
+<td class="trow1" colspan="6" align="center">{$lang->no_history}</td>
 </tr>'),
 		'sid'		=> '-1',
 		'version'	=> '',
@@ -240,7 +241,8 @@ function edithistory_activate()
 <td class="{$alt_bg}" align="center">{$history[\'username\']}</td>
 <td class="{$alt_bg}" align="center">{$history[\'ipaddress\']}</td>
 <td class="{$alt_bg}" align="center">{$dateline}</td>
-<td class="{$alt_bg}">{$originaltext}<br /><span class="smalltext">[<a href="edithistory.php?action=compare&pid={$history[\'pid\']}&eid={$history[\'eid\']}">{$lang->compare_posts}</a>]<span></td>
+<td class="{$alt_bg}">{$originaltext}</td>
+<td class="{$alt_bg}" align="center"><strong><a href="edithistory.php?action=compare&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->compare_posts}">{$lang->compare}</a> | <a href="edithistory.php?action=view&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->view_full_post_formatting}">{$lang->view}</a></strong></td>
 </tr>'),
 		'sid'		=> '-1',
 		'version'	=> '',
@@ -312,46 +314,37 @@ padding: 2px;
 {$headerinclude}
 </head>
 <body>
+{$header}
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
 <tr>
-<td class="trow1" align="center">
-<strong><span class="largetext">{$lang->view_full_post}</span></strong>
-<table cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
-<tr>
-<td class="trow2"><strong>{$lang->edited_by}:</strong></td>
-<td class="trow2">{$edit[\'username\']}</td>
+<td class="thead" colspan="2"><strong>{$lang->view_full_post}</strong></td>
 </tr>
 <tr>
-<td class="trow1"><strong>{$lang->ip_address}:</strong></td>
-<td class="trow1">{$edit[\'ipaddress\']}</td>
+<td class="trow1" width="30%"><strong>{$lang->edited_by}:</strong></td>
+<td class="trow1">{$edit[\'username\']}</td>
 </tr>
 <tr>
-<td class="trow2"><strong>{$lang->subject}:</strong></td>
-<td class="trow2">{$edit[\'subject\']}</td>
+<td class="trow2" width="30%"><strong>{$lang->ip_address}:</strong></td>
+<td class="trow2">{$edit[\'ipaddress\']}</td>
 </tr>
 <tr>
-<td class="trow1"><strong>{$lang->date}:</strong></td>
-<td class="trow1">{$dateline}</td>
+<td class="trow1" width="30%"><strong>{$lang->subject}:</strong></td>
+<td class="trow1">{$edit[\'subject\']}</td>
 </tr>
 <tr>
-<td class="trow2"><strong>{$lang->edit_reason}</strong></td>
-<td class="trow2">{$edit[\'reason\']}</td>
+<td class="trow2" width="30%"><strong>{$lang->date}:</strong></td>
+<td class="trow2">{$dateline}</td>
 </tr>
 <tr>
-<td class="trow2" colspan="2">{$originaltext}</td>
+<td class="trow1" width="30%"><strong>{$lang->edit_reason}:</strong></td>
+<td class="trow1">{$edit[\'reason\']}</td>
+</tr>
+<tr>
+<td class="trow2" width="30%"><strong>{$lang->original_text}:</strong></td>
+<td class="trow2">{$originaltext}</td>
 </tr>
 </table>
-<br /><br />
-<div style="text-align: center;">
-<script type="text/javascript">
-<!--
-document.write(\'[<a href="javascript:window.close();">{$lang->close_window}</a>]\');
-// -->
-</script>
-</div>
-</td>
-</tr>
-</table>
+{$footer}
 </body>
 </html>'),
 		'sid'		=> '-1',
