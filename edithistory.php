@@ -232,7 +232,7 @@ if(!$mybb->input['action'])
 
 		if($mybb->settings['edithistorychar'] > 0 && my_strlen($history['originaltext']) > $mybb->settings['edithistorychar'])
 		{
-			$originaltext = my_substr($history['originaltext'], 0, $mybb->settings['edithistorychar']) . "... <span class=\"smalltext\">[<a href=\"javascript:MyBB.popupWindow('edithistory.php?action=view&eid={$history['eid']}', 'view', '400', '500') \">{$lang->view_full_post}</a>]<span>";
+			$originaltext = my_substr($history['originaltext'], 0, $mybb->settings['edithistorychar']) . "... <span class=\"smalltext\">[<a href=\"edithistory.php?action=view&pid={$history['pid']}&eid={$history['eid']} \">{$lang->view_full_post}</a>]<span>";
 		}
 		else
 		{

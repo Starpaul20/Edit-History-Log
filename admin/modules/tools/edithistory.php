@@ -27,8 +27,6 @@ if($mybb->input['action'] == 'prune')
 {
 	if($mybb->request_method == 'post')
 	{
-		$pids = array();
-
 		$where = 'dateline < '.(TIME_NOW-(intval($mybb->input['older_than'])*86400));
 
 		// Searching for entries by a particular user
@@ -66,6 +64,7 @@ if($mybb->input['action'] == 'prune')
 		flash_message($lang->success_pruned_edit_history, 'success');
 		admin_redirect("index.php?module=tools-edithistory");
 	}
+
 	$page->add_breadcrumb_item($lang->prune_edit_history, "index.php?module=tools-edithistory&amp;action=prune");
 	$page->output_header($lang->prune_edit_history);
 	$page->output_nav_tabs($sub_tabs, 'prune_edit_history');

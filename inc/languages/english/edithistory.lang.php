@@ -24,7 +24,6 @@ $l['ip_address'] = "IP Address";
 $l['compare_posts'] = "Compare to current post";
 $l['view_full_post'] = "View Full Post";
 $l['view_full_post_formatting'] = "View full post with formatting";
-$l['close_window'] = "Close Window";
 $l['options'] = "Options";
 $l['view'] = "View";
 $l['compare'] = "Compare";
