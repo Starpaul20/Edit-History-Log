@@ -49,7 +49,7 @@ if($mybb->input['action'] == 'prune')
 		$db->delete_query("edithistory", $where);
 		$num_deleted = $db->affected_rows();
 
-		$query = $db->simple_select("edithistory", "pid");
+		$query = $db->simple_select("edithistory", "DISTINCT pid");
 		while($history = $db->fetch_array($query))
 		{
 			$update_array = array(

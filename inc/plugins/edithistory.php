@@ -131,7 +131,7 @@ function edithistory_activate()
 	{
 		$db->add_column("posts", "hashistory", "int(1) NOT NULL default '0'");
 
-		$query = $db->simple_select("edithistory", "pid");
+		$query = $db->simple_select("edithistory", "DISTINCT pid");
 		while($history = $db->fetch_array($query))
 		{
 			$update_array = array(
