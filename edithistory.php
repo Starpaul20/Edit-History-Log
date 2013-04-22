@@ -93,14 +93,15 @@ if($mybb->input['action'] == "compare")
 	$dateline = my_date($mybb->settings['dateformat'], $editlog['dateline']).", ".my_date($mybb->settings['timeformat'], $editlog['dateline']);
 	$lang->edit_as_of = $lang->sprintf($lang->edit_as_of, $dateline);
 
-	require_once MYBB_ROOT."inc/3rdparty/diff/Diff.php";        
-	require_once MYBB_ROOT."inc/3rdparty/diff/Diff/Renderer/inline.php";
+	require_once MYBB_ROOT."inc/3rdparty/diff/Diff.php";
+	require_once MYBB_ROOT."inc/3rdparty/diff/Diff/Renderer.php";
+	require_once MYBB_ROOT."inc/3rdparty/diff/Diff/Renderer/Inline.php";
 
 	$message1 = explode("\n", $editlog['originaltext']);
 	$message2 = explode("\n", $post['message']);
 
-	$diff = new Text_Diff('auto', array($message1, $message2));
-	$renderer = new Text_Diff_Renderer_inline();
+	$diff = new Horde_Text_Diff('auto', array($message1, $message2));
+	$renderer = new Horde_Text_Diff_Renderer_Inline();
 
 	if($editlog['originaltext'] == $post['message'])
 	{
