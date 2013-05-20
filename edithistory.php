@@ -124,9 +124,8 @@ if($mybb->input['action'] == "view")
 	add_breadcrumb($lang->view_full_post, "edithistory.php?action=view&pid={$pid}");
 
 	$query = $db->query("
-		SELECT e.*, u.username, p.fid
+		SELECT e.*, u.username
 		FROM ".TABLE_PREFIX."edithistory e
-		LEFT JOIN ".TABLE_PREFIX."posts p ON (e.pid=p.pid)
 		LEFT JOIN ".TABLE_PREFIX."users u ON (e.uid=u.uid)
 		WHERE e.eid='".intval($mybb->input['eid'])."'
 	");
@@ -137,18 +136,6 @@ if($mybb->input['action'] == "view")
 		error($lang->error_no_log);
 	}
 
-	$forum = get_forum($edit['fid']);
-
-	// Parse the post
-	$fulltext_parser = array(
-		"allow_html" => $forum['allowhtml'],
-		"allow_mycode" => $forum['allowmycode'],
-		"allow_smilies" => $forum['allowsmilies'],
-		"allow_imgcode" => $forum['allowimgcode'],
-		"allow_videocode" => $forum['allowvideocode'],
-		"filter_badwords" => 1
-	);
-
 	if(!$edit['reason'])
 	{
 		$edit['reason'] = $lang->na;
@@ -158,7 +145,10 @@ if($mybb->input['action'] == "view")
 		$edit['reason'] = htmlspecialchars_uni($edit['reason']);
 	}
 
-	$originaltext = $parser->parse_message($edit['originaltext'], $fulltext_parser);
+	// Sanitize post
+	$edit['subject'] = htmlspecialchars_uni($edit['subject']);
+	$originaltext = htmlspecialchars_uni($edit['originaltext']);
+
 	$dateline = my_date($mybb->settings['dateformat'], $edit['dateline']).", ".my_date($mybb->settings['timeformat'], $edit['dateline']);
 	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
 
