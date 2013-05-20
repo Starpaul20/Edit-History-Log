@@ -112,7 +112,7 @@ if($mybb->input['action'] == "compare")
 		$comparison = $renderer->render($diff);
 	}
 
-	$post['message'] = htmlspecialchars_uni($post['message']);
+	$post['message'] = nl2br(htmlspecialchars_uni($post['message']));
 
 	eval("\$postcomparison = \"".$templates->get("edithistory_comparison")."\";");
 	output_page($postcomparison);
@@ -147,7 +147,7 @@ if($mybb->input['action'] == "view")
 
 	// Sanitize post
 	$edit['subject'] = htmlspecialchars_uni($edit['subject']);
-	$originaltext = htmlspecialchars_uni($edit['originaltext']);
+	$originaltext = nl2br(htmlspecialchars_uni($edit['originaltext']));
 
 	$dateline = my_date($mybb->settings['dateformat'], $edit['dateline']).", ".my_date($mybb->settings['timeformat'], $edit['dateline']);
 	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
