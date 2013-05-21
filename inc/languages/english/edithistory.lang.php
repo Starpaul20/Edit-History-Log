@@ -24,9 +24,11 @@ $l['ip_address'] = "IP Address";
 $l['compare_posts'] = "Compare to current post";
 $l['view_full_post'] = "View Full Post";
 $l['view_full_post_text'] = "View full text of this post";
+$l['revert_current_post'] = "Revert current post to this version";
 $l['options'] = "Options";
 $l['view'] = "View";
 $l['compare'] = "Compare";
+$l['revert'] = "Revert";
 
 $l['edit_as_of'] = "Edit as of {1}";
 $l['current_post'] = "Current Post";
@@ -36,5 +38,7 @@ $l['comparing_edit_history'] = "Comparing Edit History of a Post";
 $l['viewing_edit_history'] = "Viewing Edit History";
 $l['highlight_added'] = "Text that has been added is hightlighted in <ins>green</ins>";
 $l['highlight_deleted'] = "Text that has been deleted is hightlighted in <del>red</del>";
+
+$l['redirect_postreverted'] = "Thank you, this post has been reverted.<br />You will now be taken to the post.";
 
 ?>

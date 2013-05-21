@@ -59,7 +59,7 @@ function edithistory_info()
 		"website"			=> "http://galaxiesrealm.com/index.php",
 		"author"			=> "Starpaul20",
 		"authorsite"		=> "http://galaxiesrealm.com/index.php",
-		"version"			=> "1.3.1",
+		"version"			=> "1.4",
 		"guid"				=> "b8223bbc5a67bc02ea405bcc4101a56c",
 		"compatibility"		=> "16*"
 	);
@@ -165,12 +165,26 @@ function edithistory_activate()
 	$db->insert_query("settings", $insertarray);
 
 	$insertarray = array(
+		'name' => 'editrevert',
+		'title' => 'Edit Reversion',
+		'description' => 'Allows you to determine who has permission to revert posts.',
+		'optionscode' => 'radio
+0=Admins, Super Mods and Mods
+1=Admins and Super Mods only
+2=Admins only',
+		'value' => 1,
+		'disporder' => 2,
+		'gid' => $gid
+	);
+	$db->insert_query("settings", $insertarray);
+
+	$insertarray = array(
 		'name' => 'editsperpages',
 		'title' => 'Edits Per Page',
 		'description' => 'Here you can enter the number of edits to show per page.',
 		'optionscode' => 'text',
 		'value' => 10,
-		'disporder' => 2,
+		'disporder' => 3,
 		'gid' => $gid
 	);
 	$db->insert_query("settings", $insertarray);
@@ -181,7 +195,7 @@ function edithistory_activate()
 		'description' => 'The number of characters needed for the post to be cut off and a link to view the full text appears.',
 		'optionscode' => 'text',
 		'value' => 1000,
-		'disporder' => 3,
+		'disporder' => 4,
 		'gid' => $gid
 	);
 	$db->insert_query("settings", $insertarray);
@@ -197,6 +211,7 @@ function edithistory_activate()
 </head>
 <body>
 {$header}
+{$post_errors}
 {$multipage}
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
 <tr>
@@ -242,8 +257,17 @@ function edithistory_activate()
 <td class="{$alt_bg}" align="center">{$history[\'ipaddress\']}</td>
 <td class="{$alt_bg}" align="center">{$dateline}</td>
 <td class="{$alt_bg}">{$originaltext}</td>
-<td class="{$alt_bg}" align="center"><strong><a href="edithistory.php?action=compare&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->compare_posts}">{$lang->compare}</a> | <a href="edithistory.php?action=view&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->view_full_post_text}">{$lang->view}</a></strong></td>
+<td class="{$alt_bg}" align="center"><strong><a href="edithistory.php?action=compare&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->compare_posts}">{$lang->compare}</a> | <a href="edithistory.php?action=view&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->view_full_post_text}">{$lang->view}</a>{$revert}</strong></td>
 </tr>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	$insert_array = array(
+		'title'		=> 'edithistory_item_revert',
+		'template'	=> $db->escape_string(' | <a href="edithistory.php?action=revert&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->revert_current_post}">{$lang->revert}</a>'),
 		'sid'		=> '-1',
 		'version'	=> '',
 		'dateline'	=> TIME_NOW
@@ -288,6 +312,7 @@ padding: 2px;
 <tr>
 <td class="thead" colspan="2"><strong>{$lang->edit_history}</strong></td>
 </tr>
+<tr>
 <td class="tcat" width="50%"><span class="smalltext"><strong>{$lang->edit_as_of}</strong></span></td>
 <td class="tcat" width="50%"><span class="smalltext"><strong>{$lang->current_post}</strong></span></td>
 </tr>
@@ -377,9 +402,9 @@ padding: 2px;
 function edithistory_deactivate()
 {
 	global $db;
-	$db->delete_query("settings", "name IN('editmodvisibility','editsperpages','edithistorychar')");
+	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editsperpages','edithistorychar')");
 	$db->delete_query("settinggroups", "name IN('edithistory')");
-	$db->delete_query("templates", "title IN('edithistory','edithistory_nohistory','edithistory_item','postbit_edithistory','edithistory_comparison','edithistory_view','editpost_reason')");
+	$db->delete_query("templates", "title IN('edithistory','edithistory_nohistory','edithistory_item','edithistory_item_revert','postbit_edithistory','edithistory_comparison','edithistory_view','editpost_reason')");
 	rebuild_settings();
 
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";

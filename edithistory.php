@@ -7,7 +7,7 @@
 define("IN_MYBB", 1);
 define('THIS_SCRIPT', 'edithistory.php');
 
-$templatelist = "edithistory,edithistory_nohistory,edithistory_item,edithistory_comparison,edithistory_view,multipage_page_current,multipage_page,multipage_nextpage,multipage_prevpage,multipage";
+$templatelist = "edithistory,edithistory_nohistory,edithistory_item,edithistory_item_revert,edithistory_comparison,edithistory_view,multipage_page_current,multipage_page,multipage_nextpage,multipage_prevpage,multipage";
 
 require_once "./global.php";
 require_once MYBB_ROOT."inc/class_parser.php";
@@ -156,6 +156,59 @@ if($mybb->input['action'] == "view")
 	output_page($view);
 }
 
+// Revert edited post
+if($mybb->input['action'] == "revert")
+{
+	// First, determine if they can revert edit
+	if($mybb->settings['editrevert'] == "2" && $mybb->usergroup['cancp'] != 1)
+	{
+		error_no_permission();
+	}
+	else if($mybb->settings['editrevert'] == "1" && ($mybb->usergroup['issupermod'] != 1 && $mybb->usergroup['cancp'] != 1))
+	{
+		error_no_permission();
+	}
+
+	$query = $db->simple_select("edithistory", "*", "eid='".intval($mybb->input['eid'])."'");
+	$history = $db->fetch_array($query);
+
+	if(!$history['eid'])
+	{
+		error($lang->error_no_log);
+	}
+
+	// Set up posthandler.
+	require_once MYBB_ROOT."inc/datahandlers/post.php";
+	$posthandler = new PostDataHandler("update");
+	$posthandler->action = "post";
+
+	// Set the post data that came from the input to the $post array.
+	$post = array(
+		"pid" => intval($history['pid']),
+		"subject" => $history['subject'],
+		"edit_uid" => 0,
+		"message" => $history['originaltext'],
+	);
+
+	$posthandler->set_data($post);
+
+	// Now let the post handler do all the hard work.
+	if(!$posthandler->validate_post())
+	{
+		$edit_errors = $posthandler->get_friendly_errors();
+		$post_errors = inline_error($edit_errors);
+		$mybb->input['action'] = "";
+	}
+	// No errors were found, we can call the update method.
+	else
+	{
+		$postinfo = $posthandler->update_post();
+		$url = get_post_link($history['pid'], $history['tid'])."#pid{$history['pid']}";
+
+		redirect($url, $lang->redirect_postreverted);
+	}
+}
+
 // Show the edit history for this post.
 if(!$mybb->input['action'])
 {
@@ -228,6 +281,24 @@ if(!$mybb->input['action'])
 		else
 		{
 			$originaltext = $history['originaltext'];
+		}
+
+		// Show revert option if allowed
+		if($mybb->settings['editrevert'] == "2" && $mybb->usergroup['cancp'] == 1)
+		{
+			eval("\$revert = \"".$templates->get("edithistory_item_revert")."\";");
+		}
+		elseif($mybb->settings['editrevert'] == "1" && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1))
+		{
+			eval("\$revert = \"".$templates->get("edithistory_item_revert")."\";");
+		}
+		elseif($mybb->settings['editrevert'] == "0")
+		{
+			eval("\$revert = \"".$templates->get("edithistory_item_revert")."\";");
+		}
+		else
+		{
+			$revert = "";
 		}
 
 		eval("\$edit_history .= \"".$templates->get("edithistory_item")."\";");
