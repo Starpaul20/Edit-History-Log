@@ -39,6 +39,7 @@ $l['viewing_edit_history'] = "Viewing Edit History";
 $l['highlight_added'] = "Text that has been added is hightlighted in <ins>green</ins>";
 $l['highlight_deleted'] = "Text that has been deleted is hightlighted in <del>red</del>";
 
+$l['revert_post_confirm'] = "Are you sure you wish to revert this post?";
 $l['redirect_postreverted'] = "Thank you, this post has been reverted.<br />You will now be taken to the post.";
 
 ?>
