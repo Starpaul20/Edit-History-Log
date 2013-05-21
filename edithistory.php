@@ -121,7 +121,7 @@ if($mybb->input['action'] == "compare")
 // Viewing full text
 if($mybb->input['action'] == "view")
 {
-	add_breadcrumb($lang->view_full_post, "edithistory.php?action=view&pid={$pid}");
+	add_breadcrumb($lang->view_original_text, "edithistory.php?action=view&pid={$pid}");
 
 	$query = $db->query("
 		SELECT e.*, u.username
@@ -147,7 +147,7 @@ if($mybb->input['action'] == "view")
 
 	// Sanitize post
 	$edit['subject'] = htmlspecialchars_uni($edit['subject']);
-	$originaltext = nl2br(htmlspecialchars_uni($edit['originaltext']));
+	$edit['originaltext'] = nl2br(htmlspecialchars_uni($edit['originaltext']));
 
 	$dateline = my_date($mybb->settings['dateformat'], $edit['dateline']).", ".my_date($mybb->settings['timeformat'], $edit['dateline']);
 	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
@@ -276,11 +276,12 @@ if(!$mybb->input['action'])
 
 		if($mybb->settings['edithistorychar'] > 0 && my_strlen($history['originaltext']) > $mybb->settings['edithistorychar'])
 		{
-			$originaltext = my_substr($history['originaltext'], 0, $mybb->settings['edithistorychar']) . "... <span class=\"smalltext\">[<a href=\"edithistory.php?action=view&pid={$history['pid']}&eid={$history['eid']} \">{$lang->view_full_post}</a>]<span>";
+			$history['originaltext'] = my_substr($history['originaltext'], 0, $mybb->settings['edithistorychar']) . "... <strong><a href=\"edithistory.php?action=view&pid={$history['pid']}&eid={$history['eid']} \">{$lang->read_more}</a></strong>";
+			$originaltext = nl2br($history['originaltext']);
 		}
 		else
 		{
-			$originaltext = $history['originaltext'];
+			$originaltext = nl2br($history['originaltext']);
 		}
 
 		// Show revert option if allowed

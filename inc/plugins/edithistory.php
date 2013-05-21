@@ -194,7 +194,7 @@ function edithistory_activate()
 		'title' => 'Post Character Cutoff',
 		'description' => 'The number of characters needed for the post to be cut off and a link to view the full text appears.',
 		'optionscode' => 'text',
-		'value' => 1000,
+		'value' => 500,
 		'disporder' => 4,
 		'gid' => $gid
 	);
@@ -257,7 +257,7 @@ function edithistory_activate()
 <td class="{$alt_bg}" align="center">{$history[\'ipaddress\']}</td>
 <td class="{$alt_bg}" align="center">{$dateline}</td>
 <td class="{$alt_bg}">{$originaltext}</td>
-<td class="{$alt_bg}" align="center"><strong><a href="edithistory.php?action=compare&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->compare_posts}">{$lang->compare}</a> | <a href="edithistory.php?action=view&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->view_full_post_text}">{$lang->view}</a>{$revert}</strong></td>
+<td class="{$alt_bg}" align="center"><strong><a href="edithistory.php?action=compare&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->compare_posts}">{$lang->compare}</a> | <a href="edithistory.php?action=view&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->view_original_text_post}">{$lang->view}</a>{$revert}</strong></td>
 </tr>'),
 		'sid'		=> '-1',
 		'version'	=> '',
@@ -334,14 +334,14 @@ padding: 2px;
 		'title'		=> 'edithistory_view',
 		'template'	=> $db->escape_string('<html>
 <head>
-<title>{$mybb->settings[\'bbname\']} - {$lang->view_full_post}</title>
+<title>{$mybb->settings[\'bbname\']} - {$lang->view_original_text}</title>
 {$headerinclude}
 </head>
 <body>
 {$header}
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
 <tr>
-<td class="thead" colspan="2"><strong>{$lang->view_full_post}</strong></td>
+<td class="thead" colspan="2"><strong>{$lang->view_original_text}</strong></td>
 </tr>
 <tr>
 <td class="trow1" width="30%"><strong>{$lang->edited_by}:</strong></td>
@@ -365,7 +365,7 @@ padding: 2px;
 </tr>
 <tr>
 <td class="trow2" width="30%"><strong>{$lang->original_text}:</strong></td>
-<td class="trow2">{$originaltext}</td>
+<td class="trow2">{$edit[\'originaltext\']}</td>
 </tr>
 </table>
 {$footer}
