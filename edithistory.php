@@ -112,8 +112,6 @@ if($mybb->input['action'] == "compare")
 		$comparison = $renderer->render($diff);
 	}
 
-	$post['message'] = nl2br(htmlspecialchars_uni($post['message']));
-
 	eval("\$postcomparison = \"".$templates->get("edithistory_comparison")."\";");
 	output_page($postcomparison);
 }

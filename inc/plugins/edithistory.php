@@ -310,15 +310,13 @@ padding: 2px;
 <br />
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
 <tr>
-<td class="thead" colspan="2"><strong>{$lang->edit_history}</strong></td>
+<td class="thead"><strong>{$lang->edit_history}</strong></td>
 </tr>
 <tr>
-<td class="tcat" width="50%"><span class="smalltext"><strong>{$lang->edit_as_of}</strong></span></td>
-<td class="tcat" width="50%"><span class="smalltext"><strong>{$lang->current_post}</strong></span></td>
+<td class="tcat"><span class="smalltext"><strong>{$lang->edit_as_of}</strong></span></td>
 </tr>
 <tr>
-<td class="trow1" width="50%"><pre style="white-space: pre-wrap;">{$comparison}</pre></td>
-<td class="trow1" width="50%">{$post[\'message\']}</td>
+<td class="trow1"><pre style="white-space: pre-wrap;">{$comparison}</pre></td>
 </tr>
 </table>
 {$footer}
