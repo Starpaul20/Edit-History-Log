@@ -274,7 +274,7 @@ if(!$mybb->input['action'])
 
 		if($mybb->settings['edithistorychar'] > 0 && my_strlen($history['originaltext']) > $mybb->settings['edithistorychar'])
 		{
-			$history['originaltext'] = my_substr($history['originaltext'], 0, $mybb->settings['edithistorychar']) . "... <strong><a href=\"edithistory.php?action=view&pid={$history['pid']}&eid={$history['eid']} \">{$lang->read_more}</a></strong>";
+			$history['originaltext'] = my_substr($history['originaltext'], 0, $mybb->settings['edithistorychar']) . "... <strong><a href=\"edithistory.php?action=view&amp;pid={$history['pid']}&amp;eid={$history['eid']} \">{$lang->read_more}</a></strong>";
 			$originaltext = nl2br($history['originaltext']);
 		}
 		else

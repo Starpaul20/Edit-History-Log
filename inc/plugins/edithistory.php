@@ -257,7 +257,7 @@ function edithistory_activate()
 <td class="{$alt_bg}" align="center">{$history[\'ipaddress\']}</td>
 <td class="{$alt_bg}" align="center">{$dateline}</td>
 <td class="{$alt_bg}">{$originaltext}</td>
-<td class="{$alt_bg}" align="center"><strong><a href="edithistory.php?action=compare&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->compare_posts}">{$lang->compare}</a> | <a href="edithistory.php?action=view&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->view_original_text_post}">{$lang->view}</a>{$revert}</strong></td>
+<td class="{$alt_bg}" align="center"><strong><a href="edithistory.php?action=compare&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}" title="{$lang->compare_posts}">{$lang->compare}</a> | <a href="edithistory.php?action=view&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}" title="{$lang->view_original_text_post}">{$lang->view}</a>{$revert}</strong></td>
 </tr>'),
 		'sid'		=> '-1',
 		'version'	=> '',
@@ -267,7 +267,7 @@ function edithistory_activate()
 
 	$insert_array = array(
 		'title'		=> 'edithistory_item_revert',
-		'template'	=> $db->escape_string(' | <a href="edithistory.php?action=revert&pid={$history[\'pid\']}&eid={$history[\'eid\']}" title="{$lang->revert_current_post}" onclick="if(confirm(&quot;{$lang->revert_post_confirm}&quot;))window.location=this.href.replace(\'action=revert\',\'action=revert\');return false;">{$lang->revert}</a>'),
+		'template'	=> $db->escape_string(' | <a href="edithistory.php?action=revert&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}" title="{$lang->revert_current_post}" onclick="if(confirm(&quot;{$lang->revert_post_confirm}&quot;))window.location=this.href.replace(\'action=revert\',\'action=revert\');return false;">{$lang->revert}</a>'),
 		'sid'		=> '-1',
 		'version'	=> '',
 		'dateline'	=> TIME_NOW
