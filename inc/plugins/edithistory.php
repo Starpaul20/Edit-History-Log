@@ -245,7 +245,7 @@ function edithistory_activate()
 
 	$insert_array = array(
 		'title'		=> 'postbit_edithistory',
-		'template'	=> $db->escape_string('<span class="smalltext"><em>(<a href="edithistory.php?pid={$post[\'pid\']}">{$lang->view_edit_history}</a>)</em></span>'),
+		'template'	=> $db->escape_string('<span class="edited_post">(<a href="edithistory.php?pid={$post[\'pid\']}">{$lang->view_edit_history}</a>)</span>'),
 		'sid'		=> '-1',
 		'version'	=> '',
 		'dateline'	=> TIME_NOW
