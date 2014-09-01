@@ -90,7 +90,7 @@ if($mybb->input['action'] == "compare")
 	}
 
 	$lang->edit_history = $lang->sprintf($lang->edit_history, $post['subject']);
-	$dateline = my_date($mybb->settings['dateformat'], $editlog['dateline']).", ".my_date($mybb->settings['timeformat'], $editlog['dateline']);
+	$dateline = my_date('relative', $editlog['dateline']);
 	$lang->edit_as_of = $lang->sprintf($lang->edit_as_of, $dateline);
 
 	require_once MYBB_ROOT."inc/3rdparty/diff/Diff.php";
@@ -147,7 +147,7 @@ if($mybb->input['action'] == "view")
 	$edit['subject'] = htmlspecialchars_uni($edit['subject']);
 	$edit['originaltext'] = nl2br(htmlspecialchars_uni($edit['originaltext']));
 
-	$dateline = my_date($mybb->settings['dateformat'], $edit['dateline']).", ".my_date($mybb->settings['timeformat'], $edit['dateline']);
+	$dateline = my_date('relative', $edit['dateline']);
 	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
 	$edit['ipaddress'] = my_inet_ntop($db->unescape_binary($edit['ipaddress']));
 
@@ -269,7 +269,7 @@ if(!$mybb->input['action'])
 
 		$history['ipaddress'] = my_inet_ntop($db->unescape_binary($history['ipaddress']));
 		$history['username'] = build_profile_link($history['username'], $history['uid']);
-		$dateline = my_date($mybb->settings['dateformat'], $history['dateline']).", ".my_date($mybb->settings['timeformat'], $history['dateline']);
+		$dateline = my_date('relative', $history['dateline']);
 
 		// Sanitize post
 		$history['originaltext'] = htmlspecialchars_uni($history['originaltext']);
