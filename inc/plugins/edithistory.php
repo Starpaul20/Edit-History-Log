@@ -387,9 +387,9 @@ function edithistory_run()
 
 	// Insert original message into edit history
 	$edit_history = array(
-		"pid" => intval($edit['pid']),
-		"tid" => intval($edit['tid']),
-		"uid" => intval($mybb->user['uid']),
+		"pid" => (int)$edit['pid'],
+		"tid" => (int)$edit['tid'],
+		"uid" => (int)$mybb->user['uid'],
 		"dateline" => TIME_NOW,
 		"originaltext" => $db->escape_string($edit['message']),
 		"subject" => $db->escape_string($edit['subject']),

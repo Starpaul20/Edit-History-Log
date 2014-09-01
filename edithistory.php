@@ -17,7 +17,7 @@ $parser = new postParser;
 $lang->load("edithistory");
 
 // Get post info
-$pid = intval($mybb->input['pid']);
+$pid = (int)$mybb->input['pid'];
 $post = get_post($pid);
 $post['subject'] = htmlspecialchars_uni($parser->parse_badwords($post['subject']));
 
@@ -76,7 +76,7 @@ if($mybb->input['action'] == "compare")
 {
 	add_breadcrumb($lang->nav_compareposts, "edithistory.php?action=compare&pid={$pid}");
 
-	$query = $db->simple_select("edithistory", "*", "eid='".intval($mybb->input['eid'])."'");
+	$query = $db->simple_select("edithistory", "*", "eid='".(int)$mybb->input['eid']."'");
 	$editlog = $db->fetch_array($query);
 
 	if(!$editlog['eid'])
@@ -125,7 +125,7 @@ if($mybb->input['action'] == "view")
 		SELECT e.*, u.username
 		FROM ".TABLE_PREFIX."edithistory e
 		LEFT JOIN ".TABLE_PREFIX."users u ON (e.uid=u.uid)
-		WHERE e.eid='".intval($mybb->input['eid'])."'
+		WHERE e.eid='".(int)$mybb->input['eid']."'
 	");
 	$edit = $db->fetch_array($query);
 
@@ -168,7 +168,7 @@ if($mybb->input['action'] == "revert")
 		error_no_permission();
 	}
 
-	$query = $db->simple_select("edithistory", "*", "eid='".intval($mybb->input['eid'])."'");
+	$query = $db->simple_select("edithistory", "*", "eid='".(int)$mybb->input['eid']."'");
 	$history = $db->fetch_array($query);
 
 	if(!$history['eid'])
@@ -183,7 +183,7 @@ if($mybb->input['action'] == "revert")
 
 	// Set the post data that came from the input to the $post array.
 	$post = array(
-		"pid" => intval($history['pid']),
+		"pid" => (int)$history['pid'],
 		"subject" => $history['subject'],
 		"edit_uid" => 0,
 		"message" => $history['originaltext'],
@@ -222,8 +222,8 @@ if(!$mybb->input['action'])
 	}
 
 	// Figure out if we need to display multiple pages.
-	$perpage = intval($mybb->settings['editsperpages']);
-	$page = intval($mybb->input['page']);
+	$perpage = (int)$mybb->settings['editsperpages'];
+	$page = (int)$mybb->input['page'];
 
 	$query = $db->simple_select("edithistory", "COUNT(eid) AS history_count", "pid='{$pid}'");
 	$history_count = $db->fetch_field($query, "history_count");
