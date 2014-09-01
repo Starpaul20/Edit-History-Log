@@ -11,17 +11,6 @@ if(!defined("IN_MYBB"))
 }
 
 // Neat trick for caching our custom template(s)
-if(my_strpos($_SERVER['PHP_SELF'], 'editpost.php'))
-{
-	global $templatelist;
-	if(isset($templatelist))
-	{
-		$templatelist .= ',';
-	}
-	$templatelist .= 'editpost_reason';
-}
-
-// Neat trick for caching our custom template(s)
 if(my_strpos($_SERVER['PHP_SELF'], 'showthread.php'))
 {
 	global $templatelist;
@@ -407,29 +396,15 @@ function edithistory_run()
 // Display log link on postbit (mods/admins only)
 function edithistory_postbit($post)
 {
-	global $db, $mybb, $lang, $templates, $fid;
+	global $mybb, $lang, $templates, $fid;
 	$lang->load("edithistory");
 
+	$post['edithistory'] = '';
 	if(is_moderator($fid, "caneditposts"))
 	{
-		if($post['hashistory'])
+		if($post['hashistory'] == 1 && ($mybb->settings['editmodvisibility'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editmodvisibility'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editmodvisibility'] == 0))
 		{
-			if($mybb->settings['editmodvisibility'] == "2" && $mybb->usergroup['cancp'] == 1)
-			{
-				eval("\$post['edithistory'] = \"".$templates->get("postbit_edithistory")."\";");
-			}
-			else if($mybb->settings['editmodvisibility'] == "1" && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1))
-			{
-				eval("\$post['edithistory'] = \"".$templates->get("postbit_edithistory")."\";");
-			}
-			else if($mybb->settings['editmodvisibility'] == "0")
-			{
-				eval("\$post['edithistory'] = \"".$templates->get("postbit_edithistory")."\";");
-			}
-			else
-			{
-				$post['edithistory'] = "";
-			}
+			eval("\$post['edithistory'] = \"".$templates->get("postbit_edithistory")."\";");
 		}
 	}
 

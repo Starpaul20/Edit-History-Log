@@ -30,15 +30,15 @@ if(!$post['pid'])
 $fid = $post['fid'];
 
 // Determine who can see the edit histories
-if($mybb->settings['editmodvisibility'] == "2" && $mybb->usergroup['cancp'] != 1)
+if($mybb->settings['editmodvisibility'] == 2 && $mybb->usergroup['cancp'] != 1)
 {
 	error_no_permission();
 }
-else if($mybb->settings['editmodvisibility'] == "1" && ($mybb->usergroup['issupermod'] != 1 && $mybb->usergroup['cancp'] != 1))
+elseif($mybb->settings['editmodvisibility'] == 1 && ($mybb->usergroup['issupermod'] != 1 && $mybb->usergroup['cancp'] != 1))
 {
 	error_no_permission();
 }
-else if(!is_moderator($fid, "caneditposts"))
+elseif(!is_moderator($fid, "caneditposts"))
 {
 	error_no_permission();
 }
@@ -159,11 +159,11 @@ if($mybb->input['action'] == "view")
 if($mybb->input['action'] == "revert")
 {
 	// First, determine if they can revert edit
-	if($mybb->settings['editrevert'] == "2" && $mybb->usergroup['cancp'] != 1)
+	if($mybb->settings['editrevert'] == 2 && $mybb->usergroup['cancp'] != 1)
 	{
 		error_no_permission();
 	}
-	else if($mybb->settings['editrevert'] == "1" && ($mybb->usergroup['issupermod'] != 1 && $mybb->usergroup['cancp'] != 1))
+	else if($mybb->settings['editrevert'] == 1 && ($mybb->usergroup['issupermod'] != 1 && $mybb->usergroup['cancp'] != 1))
 	{
 		error_no_permission();
 	}
@@ -249,7 +249,6 @@ if(!$mybb->input['action'])
 	$query = $db->query("
 		SELECT e.*, u.username
 		FROM ".TABLE_PREFIX."edithistory e
-		LEFT JOIN ".TABLE_PREFIX."posts p ON (e.pid=p.pid)
 		LEFT JOIN ".TABLE_PREFIX."users u ON (e.uid=u.uid)
 		WHERE e.pid='{$pid}'
 		ORDER BY e.dateline DESC
@@ -285,21 +284,10 @@ if(!$mybb->input['action'])
 		}
 
 		// Show revert option if allowed
-		if($mybb->settings['editrevert'] == "2" && $mybb->usergroup['cancp'] == 1)
+		$revert = '';
+		if($mybb->settings['editrevert'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editrevert'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editrevert'] == 0)
 		{
 			eval("\$revert = \"".$templates->get("edithistory_item_revert")."\";");
-		}
-		elseif($mybb->settings['editrevert'] == "1" && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1))
-		{
-			eval("\$revert = \"".$templates->get("edithistory_item_revert")."\";");
-		}
-		elseif($mybb->settings['editrevert'] == "0")
-		{
-			eval("\$revert = \"".$templates->get("edithistory_item_revert")."\";");
-		}
-		else
-		{
-			$revert = "";
 		}
 
 		eval("\$edit_history .= \"".$templates->get("edithistory_item")."\";");
