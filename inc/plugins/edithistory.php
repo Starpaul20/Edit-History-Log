@@ -78,16 +78,16 @@ function edithistory_install()
 				pid int(10) unsigned NOT NULL default '0',
 				tid int(10) unsigned NOT NULL default '0',
 				uid int(10) unsigned NOT NULL default '0',
-				dateline bigint(30) NOT NULL default '0',
+				dateline int unsigned NOT NULL default '0',
 				originaltext text NOT NULL,
-				subject varchar(200) NOT NULL default '',
+				subject varchar(120) NOT NULL default '',
 				ipaddress varbinary(16) NOT NULL default '',
-				reason varchar(200) NOT NULL default '',
+				reason varchar(150) NOT NULL default '',
 				KEY pid (pid),
 				PRIMARY KEY(eid)
 			) ENGINE=MyISAM{$collation}");
 
-	$db->add_column("posts", "hashistory", "int(1) NOT NULL default '0'");
+	$db->add_column("posts", "hashistory", "tinyint(1) NOT NULL default '0'");
 }
 
 // Checks to make sure plugin is installed
@@ -120,21 +120,6 @@ function edithistory_uninstall()
 function edithistory_activate()
 {
 	global $db;
-
-	// Upgrade support (from 1.2.x to 1.3)
-	if(!$db->field_exists("hashistory", "posts"))
-	{
-		$db->add_column("posts", "hashistory", "int(1) NOT NULL default '0'");
-
-		$query = $db->simple_select("edithistory", "DISTINCT pid");
-		while($history = $db->fetch_array($query))
-		{
-			$update_array = array(
-				"hashistory" => 1
-			);
-			$db->update_query("posts", $update_array, "pid='{$history['pid']}'");
-		}
-	}
 
 	$insertarray = array(
 		'name' => 'edithistory',
