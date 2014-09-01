@@ -35,7 +35,6 @@ if(my_strpos($_SERVER['PHP_SELF'], 'showthread.php'))
 // Tell MyBB when to run the hooks
 $plugins->add_hook("datahandler_post_update", "edithistory_run");
 $plugins->add_hook("postbit", "edithistory_postbit");
-$plugins->add_hook("editpost_end", "edithistory_edit_page");
 $plugins->add_hook("class_moderation_delete_post_start", "edithistory_delete_post");
 $plugins->add_hook("class_moderation_delete_thread_start", "edithistory_delete_thread");
 $plugins->add_hook("class_moderation_merge_threads", "edithistory_merge_thread");
@@ -88,7 +87,6 @@ function edithistory_install()
 				PRIMARY KEY(eid)
 			) ENGINE=MyISAM{$collation}");
 
-	$db->add_column("posts", "reason", "varchar(200) NOT NULL default ''");
 	$db->add_column("posts", "hashistory", "int(1) NOT NULL default '0'");
 }
 
@@ -110,11 +108,6 @@ function edithistory_uninstall()
 	if($db->table_exists("edithistory"))
 	{
 		$db->drop_table("edithistory");
-	}
-
-	if($db->field_exists("reason", "posts"))
-	{
-		$db->drop_column("posts", "reason");
 	}
 
 	if($db->field_exists("hashistory", "posts"))
@@ -377,21 +370,7 @@ padding: 2px;
 	);
 	$db->insert_query("templates", $insert_array);
 
-	$insert_array = array(
-		'title'		=> 'editpost_reason',
-		'template'	=> $db->escape_string('<tr>
-<td class="trow2"><strong>{$lang->edit_reason}</strong></td>
-<td class="trow2"><input type="text" class="textbox" name="reason" size="40" maxlength="200" value="{$postreason}" tabindex="2" /></td>
-</tr>'),
-		'sid'		=> '-1',
-		'version'	=> '',
-		'dateline'	=> TIME_NOW
-	);
-	$db->insert_query("templates", $insert_array);
-
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
-	find_replace_templatesets("editpost", "#".preg_quote('{$posticons}')."#i", '{$reason}{$posticons}');
-	find_replace_templatesets("postbit_editedby", "#".preg_quote('{$post[\'editedprofilelink\']}.)</span>')."#i", '{$post[\'editedprofilelink\']}.<!-- editreason -->)</span>');
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
 
@@ -404,12 +383,10 @@ function edithistory_deactivate()
 	global $db;
 	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editsperpages','edithistorychar')");
 	$db->delete_query("settinggroups", "name IN('edithistory')");
-	$db->delete_query("templates", "title IN('edithistory','edithistory_nohistory','edithistory_item','edithistory_item_revert','postbit_edithistory','edithistory_comparison','edithistory_view','editpost_reason')");
+	$db->delete_query("templates", "title IN('edithistory','edithistory_nohistory','edithistory_item','edithistory_item_revert','postbit_edithistory','edithistory_comparison','edithistory_view')");
 	rebuild_settings();
 
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
-	find_replace_templatesets("editpost", "#".preg_quote('{$reason}')."#i", '', 0);
-	find_replace_templatesets("postbit_editedby", "#".preg_quote('<!-- editreason -->')."#i", '', 0);
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'edithistory\']}')."#i", '', 0);
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'edithistory\']}')."#i", '', 0);
 
@@ -431,12 +408,11 @@ function edithistory_run()
 		"originaltext" => $db->escape_string($edit['message']),
 		"subject" => $db->escape_string($edit['subject']),
 		"ipaddress" => $db->escape_string($session->ipaddress),
-		"reason" => $db->escape_string($mybb->input['reason'])
+		"reason" => $db->escape_string($mybb->input['editreason'])
 	);
 	$db->insert_query("edithistory", $edit_history);
 
 	$reason = array(
-		"reason" => $db->escape_string($mybb->input['reason']),
 		"hashistory" => 1,
 	);
 	$db->update_query("posts", $reason, "pid='{$edit['pid']}'");
@@ -447,13 +423,6 @@ function edithistory_postbit($post)
 {
 	global $db, $mybb, $lang, $templates, $fid;
 	$lang->load("edithistory");
-
-	if($post['reason'])
-	{
-		$reason = htmlspecialchars_uni($post['reason']);
-		$editreason = " <em>{$lang->edit_reason_postbit} {$reason}</em>";
-		$post = str_replace("<!-- editreason -->", $editreason, $post);
-	}
 
 	if(is_moderator($fid, "caneditposts"))
 	{
@@ -479,24 +448,6 @@ function edithistory_postbit($post)
 	}
 
 	return $post;
-}
-
-// Load reason on edit page
-function edithistory_edit_page()
-{
-	global $db, $lang, $mybb, $post, $templates, $post_errors, $reason, $postreason;
-	$lang->load("edithistory");
-
-	if($mybb->input['previewpost'] || $post_errors)
-	{
-		$postreason = htmlspecialchars_uni($mybb->input['reason']);
-	}
-	else
-	{
-		$postreason = htmlspecialchars_uni($post['reason']);
-	}
-
-	eval("\$reason = \"".$templates->get("editpost_reason")."\";");
 }
 
 // Delete logs if post is deleted
