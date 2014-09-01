@@ -149,6 +149,7 @@ if($mybb->input['action'] == "view")
 
 	$dateline = my_date($mybb->settings['dateformat'], $edit['dateline']).", ".my_date($mybb->settings['timeformat'], $edit['dateline']);
 	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
+	$edit['ipaddress'] = my_inet_ntop($db->unescape_binary($edit['ipaddress']));
 
 	eval("\$view = \"".$templates->get("edithistory_view")."\";");
 	output_page($view);
@@ -266,6 +267,7 @@ if(!$mybb->input['action'])
 			$history['reason'] = htmlspecialchars_uni($history['reason']);
 		}
 
+		$history['ipaddress'] = my_inet_ntop($db->unescape_binary($history['ipaddress']));
 		$history['username'] = build_profile_link($history['username'], $history['uid']);
 		$dateline = my_date($mybb->settings['dateformat'], $history['dateline']).", ".my_date($mybb->settings['timeformat'], $history['dateline']);
 

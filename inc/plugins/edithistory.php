@@ -81,7 +81,7 @@ function edithistory_install()
 				dateline bigint(30) NOT NULL default '0',
 				originaltext text NOT NULL,
 				subject varchar(200) NOT NULL default '',
-				ipaddress varchar(30) NOT NULL default '',
+				ipaddress varbinary(16) NOT NULL default '',
 				reason varchar(200) NOT NULL default '',
 				KEY pid (pid),
 				PRIMARY KEY(eid)
@@ -398,6 +398,7 @@ function edithistory_run()
 {
 	global $db, $mybb, $post, $session;
 	$edit = get_post($post['pid']);
+	$mybb->binary_fields["edithistory"] = array('ipaddress' => true);
 
 	// Insert original message into edit history
 	$edit_history = array(
@@ -407,7 +408,7 @@ function edithistory_run()
 		"dateline" => TIME_NOW,
 		"originaltext" => $db->escape_string($edit['message']),
 		"subject" => $db->escape_string($edit['subject']),
-		"ipaddress" => $db->escape_string($session->ipaddress),
+		"ipaddress" => $db->escape_binary($session->packedip),
 		"reason" => $db->escape_string($mybb->input['editreason'])
 	);
 	$db->insert_query("edithistory", $edit_history);
