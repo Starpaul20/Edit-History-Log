@@ -53,9 +53,12 @@ $plugins->add_hook("admin_tools_get_admin_log_action", "edithistory_admin_adminl
 // The information that shows up on the plugin manager
 function edithistory_info()
 {
+	global $lang;
+	$lang->load("edithistory", true);
+
 	return array(
-		"name"				=> "Edit History Log",
-		"description"		=> "Allows you to log all edits made to posts.",
+		"name"				=> $lang->edithistory_info_name,
+		"description"		=> $lang->edithistory_info_desc,
 		"website"			=> "http://galaxiesrealm.com/index.php",
 		"author"			=> "Starpaul20",
 		"authorsite"		=> "http://galaxiesrealm.com/index.php",

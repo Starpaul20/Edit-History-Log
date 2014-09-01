@@ -4,6 +4,9 @@
  * Copyright 2010 Starpaul20
  */
 
+$l['edithistory_info_name'] = "Edit History Log";
+$l['edithistory_info_desc'] = "Allows you to log all edits made to posts.";
+
 $l['error_invalidpost'] = "The specified post does not exist.";
 $l['error_invalidforum'] = "Invalid forum";
 $l['nav_edithistory'] = "Edit History";
