@@ -41,9 +41,9 @@ $plugins->add_hook("class_moderation_merge_threads", "edithistory_merge_thread")
 $plugins->add_hook("class_moderation_split_posts", "edithistory_split_post");
 $plugins->add_hook("fetch_wol_activity_end", "edithistory_online_activity");
 $plugins->add_hook("build_friendly_wol_location_end", "edithistory_online_location");
+$plugins->add_hook("datahandler_user_delete_content", "edithistory_delete");
 
 $plugins->add_hook("admin_user_users_merge_commit", "edithistory_merge");
-$plugins->add_hook("admin_user_users_delete_commit", "edithistory_delete");
 $plugins->add_hook("admin_tools_menu_logs", "edithistory_admin_menu");
 $plugins->add_hook("admin_tools_action_handler", "edithistory_admin_action_handler");
 $plugins->add_hook("admin_tools_permissions", "edithistory_admin_permissions");
@@ -544,6 +544,16 @@ function edithistory_online_location($plugin_array)
 	return $plugin_array;
 }
 
+// Update edit history if user is deleted
+function edithistory_delete($delete)
+{
+	global $db;
+
+	$db->update_query('edithistory', array('uid' => 0), 'uid IN('.$delete->delete_uids.')');
+
+	return $delete;
+}
+
 // Update edit history user if users are merged
 function edithistory_merge()
 {
@@ -553,13 +563,6 @@ function edithistory_merge()
 		"uid" => $destination_user['uid']
 	);	
 	$db->update_query("edithistory", $uid, "uid='{$source_user['uid']}'");
-}
-
-// Update edit history if user is deleted
-function edithistory_delete()
-{
-	global $db, $mybb, $user;
-	$db->update_query("edithistory", array('uid' => 0), "uid='{$user['uid']}'");
 }
 
 // Admin CP log page
