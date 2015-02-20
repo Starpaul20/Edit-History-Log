@@ -7,7 +7,7 @@
 define("IN_MYBB", 1);
 define('THIS_SCRIPT', 'edithistory.php');
 
-$templatelist = "edithistory,edithistory_nohistory,edithistory_item,edithistory_item_revert,edithistory_item_viewmore,edithistory_comparison,edithistory_view,multipage_page_current,multipage_page,multipage_nextpage,multipage_prevpage,multipage";
+$templatelist = "edithistory,edithistory_nohistory,edithistory_item,edithistory_item_revert,edithistory_item_readmore,edithistory_comparison,edithistory_view,multipage_page_current,multipage_page,multipage_nextpage,multipage_prevpage,multipage";
 
 require_once "./global.php";
 require_once MYBB_ROOT."inc/class_parser.php";
@@ -275,11 +275,11 @@ if(!$mybb->input['action'])
 		// Sanitize post
 		$history['originaltext'] = htmlspecialchars_uni($history['originaltext']);
 
-		$viewmore = '';
+		$readmore = '';
 		if($mybb->settings['edithistorychar'] > 0 && my_strlen($history['originaltext']) > $mybb->settings['edithistorychar'])
 		{
-			eval("\$viewmore = \"".$templates->get("edithistory_item_viewmore")."\";");
-			$history['originaltext'] = my_substr($history['originaltext'], 0, $mybb->settings['edithistorychar']) . "... {$viewmore}";
+			eval("\$readmore = \"".$templates->get("edithistory_item_readmore", 1, 0)."\";");
+			$history['originaltext'] = my_substr($history['originaltext'], 0, $mybb->settings['edithistorychar']) . "... {$readmore}";
 			$originaltext = nl2br($history['originaltext']);
 		}
 		else
