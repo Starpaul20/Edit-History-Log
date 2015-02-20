@@ -1,6 +1,6 @@
 ## INFORMATION ##
 
-Edit History Log (1.0) for MyBB 1.8
+Edit History Log (1.1) for MyBB 1.8
 Created by: Starpaul20
 Copyright: ©2010
 License: GPL
