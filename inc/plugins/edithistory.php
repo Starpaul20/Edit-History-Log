@@ -192,7 +192,7 @@ function edithistory_activate()
 		'name' => 'editsperpages',
 		'title' => 'Edits Per Page',
 		'description' => 'Here you can enter the number of edits to show per page.',
-		'optionscode' => 'text',
+		'optionscode' => 'numeric',
 		'value' => 10,
 		'disporder' => 3,
 		'gid' => $gid
@@ -203,7 +203,7 @@ function edithistory_activate()
 		'name' => 'edithistorychar',
 		'title' => 'Post Character Cutoff',
 		'description' => 'The number of characters needed for the post to be cut off and a link to view the full text appears.',
-		'optionscode' => 'text',
+		'optionscode' => 'numeric',
 		'value' => 500,
 		'disporder' => 4,
 		'gid' => $gid

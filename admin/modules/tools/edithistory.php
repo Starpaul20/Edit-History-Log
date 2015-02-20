@@ -110,7 +110,7 @@ if($mybb->input['action'] == 'prune')
 	{
 		$mybb->input['older_than'] = '30';
 	}
-	$form_container->output_row($lang->date_range, "", $lang->older_than.$form->generate_text_box('older_than', $mybb->input['older_than'], array('id' => 'older_than', 'style' => 'width: 30px')).' '.$lang->days, 'older_than');
+	$form_container->output_row($lang->date_range, "", $lang->older_than.$form->generate_numeric_field('older_than', $mybb->input['older_than'], array('id' => 'older_than', 'style' => 'width: 50px', 'min' => 0)).' '.$lang->days, 'older_than');
 	$form_container->end();
 	$buttons[] = $form->generate_submit_button($lang->prune_edit_history);
 	$form->output_submit_wrapper($buttons);
@@ -314,7 +314,7 @@ if(!$mybb->input['action'])
 	$form_container->output_row($lang->user, "", $form->generate_select_box('uid', $user_options, $mybb->input['uid'], array('id' => 'uid')), 'uid');
 	$form_container->output_row($lang->thread, "", $form->generate_select_box('tid', $thread_options, $mybb->input['tid'], array('id' => 'tid')), 'tid');
 	$form_container->output_row($lang->sort_by, "", $form->generate_select_box('sortby', $sort_by, $mybb->input['sortby'], array('id' => 'sortby'))." {$lang->in} ".$form->generate_select_box('order', $order_array, $order, array('id' => 'order'))." {$lang->order}", 'order');
-	$form_container->output_row($lang->results_per_page, "", $form->generate_text_box('perpage', $perpage, array('id' => 'perpage')), 'perpage');
+	$form_container->output_row($lang->results_per_page, "", $form->generate_numeric_field('perpage', $perpage, array('id' => 'perpage', 'min' => 1)), 'perpage');
 
 	$form_container->end();
 	$buttons[] = $form->generate_submit_button($lang->filter_edit_history);
