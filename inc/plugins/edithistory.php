@@ -285,6 +285,15 @@ function edithistory_activate()
 	$db->insert_query("templates", $insert_array);
 
 	$insert_array = array(
+		'title'		=> 'edithistory_item_viewmore',
+		'template'	=> $db->escape_string('<strong><a href="edithistory.php?action=view&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}">{$lang->read_more}</a></strong>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	$insert_array = array(
 		'title'		=> 'postbit_edithistory',
 		'template'	=> $db->escape_string('<span class="edited_post">(<a href="edithistory.php?pid={$post[\'pid\']}">{$lang->view_edit_history}</a>)</span>'),
 		'sid'		=> '-1',
@@ -398,7 +407,7 @@ function edithistory_deactivate()
 	global $db;
 	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editsperpages','edithistorychar')");
 	$db->delete_query("settinggroups", "name IN('edithistory')");
-	$db->delete_query("templates", "title IN('edithistory','edithistory_nohistory','edithistory_item','edithistory_item_revert','postbit_edithistory','edithistory_comparison','edithistory_view')");
+	$db->delete_query("templates", "title IN('edithistory','edithistory_nohistory','edithistory_item','edithistory_item_revert','edithistory_item_viewmore','postbit_edithistory','edithistory_comparison','edithistory_view')");
 	rebuild_settings();
 
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
