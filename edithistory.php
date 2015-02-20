@@ -17,7 +17,7 @@ $parser = new postParser;
 $lang->load("edithistory");
 
 // Get post info
-$pid = (int)$mybb->input['pid'];
+$pid = $mybb->get_input('pid', MyBB::INPUT_INT);
 $post = get_post($pid);
 $post['subject'] = htmlspecialchars_uni($parser->parse_badwords($post['subject']));
 
@@ -71,12 +71,14 @@ if($fid > 0)
 add_breadcrumb($post['subject'], get_thread_link($post['tid']));
 add_breadcrumb($lang->nav_edithistory, "edithistory.php?pid={$pid}");
 
+$mybb->input['action'] = $mybb->get_input('action');
+
 // Comparing old/current post
 if($mybb->input['action'] == "compare")
 {
 	add_breadcrumb($lang->nav_compareposts, "edithistory.php?action=compare&pid={$pid}");
 
-	$query = $db->simple_select("edithistory", "*", "eid='".(int)$mybb->input['eid']."'");
+	$query = $db->simple_select("edithistory", "*", "eid='".$mybb->get_input('eid', MyBB::INPUT_INT)."'");
 	$editlog = $db->fetch_array($query);
 
 	if(!$editlog['eid'])
@@ -125,7 +127,7 @@ if($mybb->input['action'] == "view")
 		SELECT e.*, u.username
 		FROM ".TABLE_PREFIX."edithistory e
 		LEFT JOIN ".TABLE_PREFIX."users u ON (e.uid=u.uid)
-		WHERE e.eid='".(int)$mybb->input['eid']."'
+		WHERE e.eid='".$mybb->get_input('eid', MyBB::INPUT_INT)."'
 	");
 	$edit = $db->fetch_array($query);
 
@@ -168,7 +170,7 @@ if($mybb->input['action'] == "revert")
 		error_no_permission();
 	}
 
-	$query = $db->simple_select("edithistory", "*", "eid='".(int)$mybb->input['eid']."'");
+	$query = $db->simple_select("edithistory", "*", "eid='".$mybb->get_input('eid', MyBB::INPUT_INT)."'");
 	$history = $db->fetch_array($query);
 
 	if(!$history['eid'])
@@ -223,7 +225,7 @@ if(!$mybb->input['action'])
 
 	// Figure out if we need to display multiple pages.
 	$perpage = (int)$mybb->settings['editsperpages'];
-	$page = (int)$mybb->input['page'];
+	$page = $mybb->get_input('page', MyBB::INPUT_INT);
 
 	$query = $db->simple_select("edithistory", "COUNT(eid) AS history_count", "pid='{$pid}'");
 	$history_count = $db->fetch_field($query, "history_count");

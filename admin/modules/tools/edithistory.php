@@ -27,18 +27,18 @@ if($mybb->input['action'] == 'prune')
 {
 	if($mybb->request_method == 'post')
 	{
-		$where = 'dateline < '.(TIME_NOW-((int)$mybb->input['older_than']*86400));
+		$where = 'dateline < '.(TIME_NOW-($mybb->get_input('older_than', MyBB::INPUT_INT)*86400));
 
 		// Searching for entries by a particular user
 		if($mybb->input['uid'])
 		{
-			$where .= " AND uid='".$mybb->get_input('uid', 1)."'";
+			$where .= " AND uid='".$mybb->get_input('uid', MyBB::INPUT_INT)."'";
 		}
 
 		// Searching for entries in a specific thread
 		if($mybb->input['tid'])
 		{
-			$where .= " AND tid='".$mybb->get_input('tid', 1)."'";
+			$where .= " AND tid='".$mybb->get_input('tid', MyBB::INPUT_INT)."'";
 		}
 
 		$update_array = array(
@@ -125,7 +125,7 @@ if(!$mybb->input['action'])
 
 	$page->output_nav_tabs($sub_tabs, 'edit_history');
 
-	$perpage = $mybb->get_input('perpage', 1);
+	$perpage = $mybb->get_input('perpage', MyBB::INPUT_INT);
 	if(!$perpage)
 	{
 		if(!$mybb->settings['threadsperpage'] || (int)$mybb->settings['threadsperpage'] < 1)
@@ -141,13 +141,13 @@ if(!$mybb->input['action'])
 	// Searching for entries by a particular user
 	if($mybb->input['uid'])
 	{
-		$where .= " AND e.uid='".$mybb->get_input('uid', 1)."'";
+		$where .= " AND e.uid='".$mybb->get_input('uid', MyBB::INPUT_INT)."'";
 	}
 
 	// Searching for entries in a specific thread
 	if($mybb->input['tid'])
 	{
-		$where .= " AND e.tid='".$mybb->get_input('tid', 1)."'";
+		$where .= " AND e.tid='".$mybb->get_input('tid', MyBB::INPUT_INT)."'";
 	}
 
 	// Order?
@@ -178,7 +178,7 @@ if(!$mybb->input['action'])
 	// Figure out if we need to display multiple pages.
 	if($mybb->input['page'] != "last")
 	{
-		$pagecnt = $mybb->get_input('page', 1);
+		$pagecnt = $mybb->get_input('page', MyBB::INPUT_INT);
 	}
 
 	$postcount = (int)$rescount;
@@ -299,7 +299,7 @@ if(!$mybb->input['action'])
 	}
 
 	$sort_by = array(
-		'dateline' => $lang->date,
+		'dateline' => $lang->edit_date,
 		'username' => $lang->username,
 		'thread' => $lang->thread_subject
 	);
