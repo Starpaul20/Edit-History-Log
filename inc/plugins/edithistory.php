@@ -63,7 +63,37 @@ function edithistory_install()
 	edithistory_uninstall();
 	$collation = $db->build_create_table_collation();
 
-	$db->write_query("CREATE TABLE ".TABLE_PREFIX."edithistory (
+	switch($db->type)
+	{
+		case "sqlite":
+			$db->write_query("CREATE TABLE ".TABLE_PREFIX."edithistory (
+				eid INTEGER PRIMARY KEY,
+				pid int NOT NULL default '0',
+				tid int NOT NULL default '0',
+				uid int NOT NULL default '0',
+				dateline int NOT NULL default '0',
+				originaltext TEXT NOT NULL,
+				subject varchar(120) NOT NULL default '',
+				ipaddress blob(16) NOT NULL default '',
+				reason varchar(150) NOT NULL default ''
+			);");
+			break;
+		case "pgsql":
+			$db->write_query("CREATE TABLE ".TABLE_PREFIX."edithistory (
+				eid serial,
+				pid int NOT NULL default '0',
+				tid int NOT NULL default '0',
+				uid int NOT NULL default '0',
+				dateline numeric(30,0) NOT NULL default '0',
+				originaltext text NOT NULL default '',
+				subject varchar(120) NOT NULL DEFAULT '',
+				ipaddress bytea NOT NULL default '',
+				reason varchar(150) NOT NULL DEFAULT '',
+				PRIMARY KEY (eid)
+			);");
+			break;
+		default:
+			$db->write_query("CREATE TABLE ".TABLE_PREFIX."edithistory (
 				eid int(10) unsigned NOT NULL auto_increment,
 				pid int(10) unsigned NOT NULL default '0',
 				tid int(10) unsigned NOT NULL default '0',
@@ -75,9 +105,19 @@ function edithistory_install()
 				reason varchar(150) NOT NULL default '',
 				KEY pid (pid),
 				PRIMARY KEY(eid)
-			) ENGINE=MyISAM{$collation}");
+			) ENGINE=MyISAM{$collation};");
+			break;
+	}
 
-	$db->add_column("posts", "hashistory", "tinyint(1) NOT NULL default '0'");
+	switch($db->type)
+	{
+		case "pgsql":
+			$db->add_column("posts", "hashistory", "smallint NOT NULL default '0'");
+			break;
+		default:
+			$db->add_column("posts", "hashistory", "tinyint(1) NOT NULL default '0'");
+			break;
+	}
 }
 
 // Checks to make sure plugin is installed
