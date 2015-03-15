@@ -7,7 +7,7 @@
 define("IN_MYBB", 1);
 define('THIS_SCRIPT', 'edithistory.php');
 
-$templatelist = "edithistory,edithistory_nohistory,edithistory_item,edithistory_item_revert,edithistory_item_readmore,edithistory_comparison,edithistory_view,multipage_page_current,multipage_page,multipage_nextpage,multipage_prevpage,multipage";
+$templatelist = "edithistory,edithistory_ipaddress,edithistory_nohistory,edithistory_item,edithistory_item_revert,edithistory_item_readmore,edithistory_comparison,edithistory_view,edithistory_view_ipaddress,edithistory_item_ipaddress,multipage_page_current,multipage_page,multipage_nextpage,multipage_prevpage,multipage";
 
 require_once "./global.php";
 require_once MYBB_ROOT."inc/class_parser.php";
@@ -151,7 +151,13 @@ if($mybb->input['action'] == "view")
 
 	$dateline = my_date('relative', $edit['dateline']);
 	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
-	$edit['ipaddress'] = my_inet_ntop($db->unescape_binary($edit['ipaddress']));
+
+	$ipaddress = '';
+	if(is_moderator($fid, "canviewips") && ($mybb->settings['editipaddress'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editipaddress'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editipaddress'] == 0))
+	{
+		$edit['ipaddress'] = my_inet_ntop($db->unescape_binary($edit['ipaddress']));
+		eval("\$ipaddress = \"".$templates->get("edithistory_view_ipaddress")."\";");
+	}
 
 	eval("\$view = \"".$templates->get("edithistory_view")."\";");
 	output_page($view);
@@ -268,7 +274,13 @@ if(!$mybb->input['action'])
 			$history['reason'] = htmlspecialchars_uni($history['reason']);
 		}
 
-		$history['ipaddress'] = my_inet_ntop($db->unescape_binary($history['ipaddress']));
+		$ipaddress = '';
+		if(is_moderator($fid, "canviewips") && ($mybb->settings['editipaddress'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editipaddress'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editipaddress'] == 0))
+		{
+			$history['ipaddress'] = my_inet_ntop($db->unescape_binary($history['ipaddress']));
+			eval("\$ipaddress = \"".$templates->get("edithistory_item_ipaddress")."\";");
+		}
+
 		$history['username'] = build_profile_link($history['username'], $history['uid']);
 		$dateline = my_date('relative', $history['dateline']);
 
@@ -295,6 +307,17 @@ if(!$mybb->input['action'])
 		}
 
 		eval("\$edit_history .= \"".$templates->get("edithistory_item")."\";");
+	}
+
+	$ipaddress_header = '';
+	if(is_moderator($fid, "canviewips") && ($mybb->settings['editipaddress'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editipaddress'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editipaddress'] == 0))
+	{
+		$colspan = 6;
+		eval("\$ipaddress_header = \"".$templates->get("edithistory_ipaddress")."\";");
+	}
+	else
+	{
+		$colspan = 5;
 	}
 
 	if(!$edit_history)

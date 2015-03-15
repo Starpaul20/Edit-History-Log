@@ -189,12 +189,26 @@ function edithistory_activate()
 	$db->insert_query("settings", $insertarray);
 
 	$insertarray = array(
+		'name' => 'editipaddress',
+		'title' => 'Edit IP Address',
+		'description' => $db->escape_string('Allows you to determine who has permission to view edit IP addresses. Please note Forum Moderators must also have permission to view IP addresses in forums they\'re assigned to.'),
+		'optionscode' => 'radio
+0=Admins, Super Mods and Mods
+1=Admins and Super Mods only
+2=Admins only',
+		'value' => 0,
+		'disporder' => 3,
+		'gid' => $gid
+	);
+	$db->insert_query("settings", $insertarray);
+
+	$insertarray = array(
 		'name' => 'editsperpages',
 		'title' => 'Edits Per Page',
 		'description' => 'Here you can enter the number of edits to show per page.',
 		'optionscode' => 'numeric',
 		'value' => 10,
-		'disporder' => 3,
+		'disporder' => 4,
 		'gid' => $gid
 	);
 	$db->insert_query("settings", $insertarray);
@@ -205,7 +219,7 @@ function edithistory_activate()
 		'description' => 'The number of characters needed for the post to be cut off and a link to view the full text appears.',
 		'optionscode' => 'numeric',
 		'value' => 500,
-		'disporder' => 4,
+		'disporder' => 5,
 		'gid' => $gid
 	);
 	$db->insert_query("settings", $insertarray);
@@ -225,12 +239,12 @@ function edithistory_activate()
 {$multipage}
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
 <tr>
-<td class="thead" colspan="6"><strong>{$lang->edit_history}</strong></td>
+<td class="thead" colspan="{$colspan}"><strong>{$lang->edit_history}</strong></td>
 </tr>
 <tr>
 <td class="tcat" align="center"><span class="smalltext"><strong>{$lang->edit_reason}</strong></span></td>
 <td class="tcat" width="10%" align="center"><span class="smalltext"><strong>{$lang->edited_by}</strong></span></td>
-<td class="tcat" width="10%" align="center"><span class="smalltext"><strong>{$lang->ip_address}</strong></span></td>
+{$ipaddress_header}
 <td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->date}</strong></span></td>
 <td class="tcat" width="35%" align="center"><span class="smalltext"><strong>{$lang->original_text}</strong></span></td>
 <td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->options}</strong></span></td>
@@ -249,9 +263,18 @@ function edithistory_activate()
 	$db->insert_query("templates", $insert_array);
 
 	$insert_array = array(
+		'title'		=> 'edithistory_ipaddress',
+		'template'	=> $db->escape_string('<td class="tcat" width="10%" align="center"><span class="smalltext"><strong>{$lang->ip_address}</strong></span></td>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	$insert_array = array(
 		'title'		=> 'edithistory_nohistory',
 		'template'	=> $db->escape_string('<tr>
-<td class="trow1" colspan="6" align="center">{$lang->no_history}</td>
+<td class="trow1" colspan="{$colspan}" align="center">{$lang->no_history}</td>
 </tr>'),
 		'sid'		=> '-1',
 		'version'	=> '',
@@ -264,11 +287,20 @@ function edithistory_activate()
 		'template'	=> $db->escape_string('<tr>
 <td class="{$alt_bg}" align="center">{$history[\'reason\']}</td>
 <td class="{$alt_bg}" align="center">{$history[\'username\']}</td>
-<td class="{$alt_bg}" align="center">{$history[\'ipaddress\']}</td>
+{$ipaddress}
 <td class="{$alt_bg}" align="center">{$dateline}</td>
 <td class="{$alt_bg}">{$originaltext}</td>
 <td class="{$alt_bg}" align="center"><strong><a href="edithistory.php?action=compare&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}" title="{$lang->compare_posts}">{$lang->compare}</a> | <a href="edithistory.php?action=view&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}" title="{$lang->view_original_text_post}">{$lang->view}</a>{$revert}</strong></td>
 </tr>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
+	$insert_array = array(
+		'title'		=> 'edithistory_item_ipaddress',
+		'template'	=> $db->escape_string('<td class="{$alt_bg}" align="center">{$history[\'ipaddress\']}</td>'),
 		'sid'		=> '-1',
 		'version'	=> '',
 		'dateline'	=> TIME_NOW
@@ -364,10 +396,7 @@ padding: 2px;
 <td class="trow1" width="30%"><strong>{$lang->edited_by}:</strong></td>
 <td class="trow1">{$edit[\'username\']}</td>
 </tr>
-<tr>
-<td class="trow2" width="30%"><strong>{$lang->ip_address}:</strong></td>
-<td class="trow2">{$edit[\'ipaddress\']}</td>
-</tr>
+{$ipaddress}
 <tr>
 <td class="trow1" width="30%"><strong>{$lang->subject}:</strong></td>
 <td class="trow1">{$edit[\'subject\']}</td>
@@ -394,6 +423,18 @@ padding: 2px;
 	);
 	$db->insert_query("templates", $insert_array);
 
+	$insert_array = array(
+		'title'		=> 'edithistory_view_ipaddress',
+		'template'	=> $db->escape_string('<tr>
+<td class="trow2" width="30%"><strong>{$lang->ip_address}:</strong></td>
+<td class="trow2">{$edit[\'ipaddress\']}</td>
+</tr>'),
+		'sid'		=> '-1',
+		'version'	=> '',
+		'dateline'	=> TIME_NOW
+	);
+	$db->insert_query("templates", $insert_array);
+
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
@@ -405,9 +446,9 @@ padding: 2px;
 function edithistory_deactivate()
 {
 	global $db;
-	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editsperpages','edithistorychar')");
+	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editipaddress','editsperpages','edithistorychar')");
 	$db->delete_query("settinggroups", "name IN('edithistory')");
-	$db->delete_query("templates", "title IN('edithistory','edithistory_nohistory','edithistory_item','edithistory_item_revert','edithistory_item_readmore','postbit_edithistory','edithistory_comparison','edithistory_view')");
+	$db->delete_query("templates", "title IN('edithistory','edithistory_ipaddress','edithistory_nohistory','edithistory_item','edithistory_item_ipaddress','edithistory_item_revert','edithistory_item_readmore','postbit_edithistory','edithistory_comparison','edithistory_view','edithistory_view_ipaddress')");
 	rebuild_settings();
 
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
