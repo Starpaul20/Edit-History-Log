@@ -224,6 +224,17 @@ function edithistory_activate()
 	);
 	$db->insert_query("settings", $insertarray);
 
+	$insertarray = array(
+		'name' => 'edithistorypruning',
+		'title' => 'Prune Edit History',
+		'description' => 'The number of days to keep edit histories before they are pruned. Set to 0 to disable.',
+		'optionscode' => 'numeric',
+		'value' => 120,
+		'disporder' => 6,
+		'gid' => $gid
+	);
+	$db->insert_query("settings", $insertarray);
+
 	rebuild_settings();
 
 	$insert_array = array(
@@ -435,6 +446,24 @@ padding: 2px;
 	);
 	$db->insert_query("templates", $insert_array);
 
+	require_once MYBB_ROOT."inc/functions_task.php";
+	$subscription_insert = array(
+		"title"			=> "Edit History Pruning",
+		"description"	=> "Automatically prunes edit history based on the time set in the settings every day.",
+		"file"			=> "edithistory",
+		"minute"		=> "0",
+		"hour"			=> "3",
+		"day"			=> "*",
+		"month"			=> "*",
+		"weekday"		=> "*",
+		"enabled"		=> 0,
+		"logging"		=> 1,
+		"locked"		=> 0
+	);
+
+	$subscription_insert['nextrun'] = fetch_next_run($subscription_insert);
+	$db->insert_query("tasks", $subscription_insert);
+
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
@@ -446,9 +475,10 @@ padding: 2px;
 function edithistory_deactivate()
 {
 	global $db;
-	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editipaddress','editsperpages','edithistorychar')");
+	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editipaddress','editsperpages','edithistorychar','edithistorypruning')");
 	$db->delete_query("settinggroups", "name IN('edithistory')");
 	$db->delete_query("templates", "title IN('edithistory','edithistory_ipaddress','edithistory_nohistory','edithistory_item','edithistory_item_ipaddress','edithistory_item_revert','edithistory_item_readmore','postbit_edithistory','edithistory_comparison','edithistory_view','edithistory_view_ipaddress')");
+	$db->delete_query("tasks", "file='edithistory'");
 	rebuild_settings();
 
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
