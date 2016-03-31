@@ -249,19 +249,18 @@ function edithistory_activate()
 {$post_errors}
 {$multipage}
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
-<tr>
-<td class="thead" colspan="{$colspan}"><strong>{$lang->edit_history}</strong></td>
-</tr>
-<tr>
-<td class="tcat" align="center"><span class="smalltext"><strong>{$lang->edit_reason}</strong></span></td>
-<td class="tcat" width="10%" align="center"><span class="smalltext"><strong>{$lang->edited_by}</strong></span></td>
-{$ipaddress_header}
-<td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->date}</strong></span></td>
-<td class="tcat" width="35%" align="center"><span class="smalltext"><strong>{$lang->original_text}</strong></span></td>
-<td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->options}</strong></span></td>
-</tr>
-{$edit_history}
-</tr>
+	<tr>
+		<td class="thead" colspan="{$colspan}"><strong>{$lang->edit_history}</strong></td>
+	</tr>
+	<tr>
+		<td class="tcat" align="center"><span class="smalltext"><strong>{$lang->edit_reason}</strong></span></td>
+		<td class="tcat" width="10%" align="center"><span class="smalltext"><strong>{$lang->edited_by}</strong></span></td>
+		{$ipaddress_header}
+		<td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->date}</strong></span></td>
+		<td class="tcat" width="35%" align="center"><span class="smalltext"><strong>{$lang->original_text}</strong></span></td>
+		<td class="tcat" width="15%" align="center"><span class="smalltext"><strong>{$lang->options}</strong></span></td>
+	</tr>
+	{$edit_history}
 </table>
 {$multipage}
 {$footer}
@@ -285,7 +284,7 @@ function edithistory_activate()
 	$insert_array = array(
 		'title'		=> 'edithistory_nohistory',
 		'template'	=> $db->escape_string('<tr>
-<td class="trow1" colspan="{$colspan}" align="center">{$lang->no_history}</td>
+	<td class="trow1" colspan="{$colspan}" align="center">{$lang->no_history}</td>
 </tr>'),
 		'sid'		=> '-1',
 		'version'	=> '',
@@ -296,12 +295,12 @@ function edithistory_activate()
 	$insert_array = array(
 		'title'		=> 'edithistory_item',
 		'template'	=> $db->escape_string('<tr>
-<td class="{$alt_bg}" align="center">{$history[\'reason\']}</td>
-<td class="{$alt_bg}" align="center">{$history[\'username\']}</td>
-{$ipaddress}
-<td class="{$alt_bg}" align="center">{$dateline}</td>
-<td class="{$alt_bg}">{$originaltext}</td>
-<td class="{$alt_bg}" align="center"><strong><a href="edithistory.php?action=compare&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}" title="{$lang->compare_posts}">{$lang->compare}</a> | <a href="edithistory.php?action=view&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}" title="{$lang->view_original_text_post}">{$lang->view}</a>{$revert}</strong></td>
+	<td class="{$alt_bg}" align="center">{$history[\'reason\']}</td>
+	<td class="{$alt_bg}" align="center">{$history[\'username\']}</td>
+	{$ipaddress}
+	<td class="{$alt_bg}" align="center">{$dateline}</td>
+	<td class="{$alt_bg}">{$originaltext}</td>
+	<td class="{$alt_bg}" align="center"><strong><a href="edithistory.php?action=compare&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}" title="{$lang->compare_posts}">{$lang->compare}</a> | <a href="edithistory.php?action=view&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}" title="{$lang->view_original_text_post}">{$lang->view}</a>{$revert}</strong></td>
 </tr>'),
 		'sid'		=> '-1',
 		'version'	=> '',
@@ -371,15 +370,15 @@ padding: 2px;
 <span class="smalltext">{$lang->highlight_deleted}</span><br />
 <br />
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
-<tr>
-<td class="thead"><strong>{$lang->edit_history}</strong></td>
-</tr>
-<tr>
-<td class="tcat"><span class="smalltext"><strong>{$lang->edit_as_of}</strong></span></td>
-</tr>
-<tr>
-<td class="trow1"><pre style="white-space: pre-wrap;">{$comparison}</pre></td>
-</tr>
+	<tr>
+		<td class="thead"><strong>{$lang->edit_history}</strong></td>
+	</tr>
+	<tr>
+		<td class="tcat"><span class="smalltext"><strong>{$lang->edit_as_of}</strong></span></td>
+	</tr>
+	<tr>
+		<td class="trow1"><pre style="white-space: pre-wrap;">{$comparison}</pre></td>
+	</tr>
 </table>
 {$footer}
 </body>
@@ -400,30 +399,30 @@ padding: 2px;
 <body>
 {$header}
 <table border="0" cellspacing="{$theme[\'borderwidth\']}" cellpadding="{$theme[\'tablespace\']}" class="tborder">
-<tr>
-<td class="thead" colspan="2"><strong>{$lang->view_original_text}</strong></td>
-</tr>
-<tr>
-<td class="trow1" width="30%"><strong>{$lang->edited_by}:</strong></td>
-<td class="trow1">{$edit[\'username\']}</td>
-</tr>
-{$ipaddress}
-<tr>
-<td class="trow1" width="30%"><strong>{$lang->subject}:</strong></td>
-<td class="trow1">{$edit[\'subject\']}</td>
-</tr>
-<tr>
-<td class="trow2" width="30%"><strong>{$lang->date}:</strong></td>
-<td class="trow2">{$dateline}</td>
-</tr>
-<tr>
-<td class="trow1" width="30%"><strong>{$lang->edit_reason}:</strong></td>
-<td class="trow1">{$edit[\'reason\']}</td>
-</tr>
-<tr>
-<td class="trow2" width="30%"><strong>{$lang->original_text}:</strong></td>
-<td class="trow2">{$edit[\'originaltext\']}</td>
-</tr>
+	<tr>
+		<td class="thead" colspan="2"><strong>{$lang->view_original_text}</strong></td>
+	</tr>
+	<tr>
+		<td class="trow1" width="30%"><strong>{$lang->edited_by}:</strong></td>
+		<td class="trow1">{$edit[\'username\']}</td>
+	</tr>
+	{$ipaddress}
+	<tr>
+		<td class="trow1" width="30%"><strong>{$lang->subject}:</strong></td>
+		<td class="trow1">{$edit[\'subject\']}</td>
+	</tr>
+	<tr>
+		<td class="trow2" width="30%"><strong>{$lang->date}:</strong></td>
+		<td class="trow2">{$dateline}</td>
+	</tr>
+	<tr>
+		<td class="trow1" width="30%"><strong>{$lang->edit_reason}:</strong></td>
+		<td class="trow1">{$edit[\'reason\']}</td>
+	</tr>
+	<tr>
+		<td class="trow2" width="30%"><strong>{$lang->original_text}:</strong></td>
+		<td class="trow2">{$edit[\'originaltext\']}</td>
+	</tr>
 </table>
 {$footer}
 </body>
@@ -437,8 +436,8 @@ padding: 2px;
 	$insert_array = array(
 		'title'		=> 'edithistory_view_ipaddress',
 		'template'	=> $db->escape_string('<tr>
-<td class="trow2" width="30%"><strong>{$lang->ip_address}:</strong></td>
-<td class="trow2">{$edit[\'ipaddress\']}</td>
+	<td class="trow2" width="30%"><strong>{$lang->ip_address}:</strong></td>
+	<td class="trow2">{$edit[\'ipaddress\']}</td>
 </tr>'),
 		'sid'		=> '-1',
 		'version'	=> '',
