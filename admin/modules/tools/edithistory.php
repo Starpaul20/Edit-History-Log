@@ -27,7 +27,14 @@ if($mybb->input['action'] == 'prune')
 {
 	if($mybb->request_method == 'post')
 	{
-		$where = 'dateline < '.(TIME_NOW-($mybb->get_input('older_than', MyBB::INPUT_INT)*86400));
+		$is_today = false;
+		$mybb->input['older_than'] = $mybb->get_input('older_than', MyBB::INPUT_INT);
+		if($mybb->input['older_than'] <= 0)
+		{
+			$is_today = true;
+			$mybb->input['older_than'] = 1;
+		}
+		$where = 'dateline < '.(TIME_NOW-($mybb->input['older_than']*86400));
 
 		// Searching for entries by a particular user
 		if($mybb->input['uid'])
@@ -61,7 +68,17 @@ if($mybb->input['action'] == 'prune')
 		// Log admin action
 		log_admin_action($mybb->input['older_than'], $mybb->input['uid'], $mybb->input['tid'], $num_deleted);
 
-		flash_message($lang->success_pruned_edit_history, 'success');
+		$success = $lang->success_pruned_edit_history;
+		if($is_today == true && $num_deleted > 0)
+		{
+			$success .= ' '.$lang->note_history_locked;
+		}
+		elseif($is_today == true && $num_deleted == 0)
+		{
+			flash_message($lang->note_history_locked, 'error');
+			admin_redirect("index.php?module=tools-edithistory");
+		}
+		flash_message($success, 'success');
 		admin_redirect("index.php?module=tools-edithistory");
 	}
 

@@ -12,6 +12,7 @@ $l['prune_edit_history'] = "Prune Edit History";
 $l['edit_history_desc'] = "Here you can view and search all edits made to posts.";
 $l['prune_edit_history_desc'] = "Here you can prune edit histories matching a specified criteria.";
 $l['success_pruned_edit_history'] = "The edit history have been pruned successfully.";
+$l['note_history_locked'] = "For security reasons, edit histories less than 24 hours old cannot be pruned.";
 
 $l['all_users'] = "All Users";
 $l['all_threads'] = "All Threads";
