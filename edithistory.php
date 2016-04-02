@@ -236,7 +236,7 @@ if(!$mybb->input['action'])
 	// Get edit history
 	$edit_history = '';
 
-	if(!$mybb->settings['editsperpages'])
+	if(!$mybb->settings['editsperpages'] || (int)$mybb->settings['editsperpages'] < 1)
 	{
 		$mybb->settings['editsperpages'] = 10;
 	}
