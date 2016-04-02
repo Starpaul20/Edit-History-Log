@@ -28,6 +28,17 @@ if(!$post['pid'])
 	error($lang->error_invalidpost);
 }
 
+// Get thread info
+$tid = $post['tid'];
+$thread = get_thread($tid);
+
+if(!$thread)
+{
+	error($lang->error_invalidthread);
+}
+
+$thread['subject'] = htmlspecialchars_uni($parser->parse_badwords($thread['subject']));
+
 $fid = $post['fid'];
 
 // Determine who can see the edit histories
@@ -69,7 +80,7 @@ if($fid > 0)
 }
 
 // Make navigation
-add_breadcrumb($post['subject'], get_thread_link($post['tid']));
+add_breadcrumb($thread['subject'], get_thread_link($thread['tid']));
 add_breadcrumb($lang->nav_edithistory, "edithistory.php?pid={$pid}");
 
 $mybb->input['action'] = $mybb->get_input('action');
