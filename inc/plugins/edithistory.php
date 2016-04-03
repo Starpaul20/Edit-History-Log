@@ -24,6 +24,7 @@ if(my_strpos($_SERVER['PHP_SELF'], 'showthread.php'))
 // Tell MyBB when to run the hooks
 $plugins->add_hook("datahandler_post_update", "edithistory_run");
 $plugins->add_hook("postbit", "edithistory_postbit");
+$plugins->add_hook("xmlhttp_update_post", "edithistory_xmlhttp");
 $plugins->add_hook("class_moderation_delete_post_start", "edithistory_delete_post");
 $plugins->add_hook("class_moderation_delete_thread_start", "edithistory_delete_thread");
 $plugins->add_hook("class_moderation_merge_threads", "edithistory_merge_thread");
@@ -529,6 +530,24 @@ function edithistory_postbit($post)
 	}
 
 	return $post;
+}
+
+// Add Edit History link when quick editing (mods/admins only)
+function edithistory_xmlhttp()
+{
+	global $mybb, $lang, $templates, $post, $editedmsg_response;
+	$lang->load("edithistory");
+
+	$edithistory = '';
+	if(is_moderator($post['fid'], "caneditposts"))
+	{
+		if($mybb->settings['editmodvisibility'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editmodvisibility'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editmodvisibility'] == 0)
+		{
+			eval("\$edithistory = \"".$templates->get("postbit_edithistory")."\";");
+		}
+	}
+
+	$editedmsg_response .= $edithistory;
 }
 
 // Delete logs if post is deleted
