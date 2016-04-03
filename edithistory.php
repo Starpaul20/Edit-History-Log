@@ -154,12 +154,12 @@ if($mybb->input['action'] == "view")
 	}
 	else
 	{
-		$edit['reason'] = htmlspecialchars_uni($edit['reason']);
+		$edit['reason'] = htmlspecialchars_uni($parser->parse_badwords($edit['reason']));
 	}
 
 	// Sanitize post
-	$edit['subject'] = htmlspecialchars_uni($edit['subject']);
-	$edit['originaltext'] = nl2br(htmlspecialchars_uni($edit['originaltext']));
+	$edit['subject'] = htmlspecialchars_uni($parser->parse_badwords($edit['subject']));
+	$edit['originaltext'] = nl2br(htmlspecialchars_uni($parser->parse_badwords($edit['originaltext'])));
 
 	$dateline = my_date('relative', $edit['dateline']);
 	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
@@ -231,7 +231,7 @@ if($mybb->input['action'] == "revert")
 // Show the edit history for this post.
 if(!$mybb->input['action'])
 {
-	$lang->edit_history = $lang->sprintf($lang->edit_history, htmlspecialchars_uni($post['subject']));
+	$lang->edit_history = $lang->sprintf($lang->edit_history, $post['subject']);
 
 	// Get edit history
 	$edit_history = '';
@@ -283,7 +283,7 @@ if(!$mybb->input['action'])
 		}
 		else
 		{
-			$history['reason'] = htmlspecialchars_uni($history['reason']);
+			$history['reason'] = htmlspecialchars_uni($parser->parse_badwords($history['reason']));
 		}
 
 		$ipaddress = '';
@@ -297,7 +297,7 @@ if(!$mybb->input['action'])
 		$dateline = my_date('relative', $history['dateline']);
 
 		// Sanitize post
-		$history['originaltext'] = htmlspecialchars_uni($history['originaltext']);
+		$history['originaltext'] = htmlspecialchars_uni($parser->parse_badwords($history['originaltext']));
 
 		$readmore = '';
 		if($mybb->settings['edithistorychar'] > 0 && my_strlen($history['originaltext']) > $mybb->settings['edithistorychar'])
