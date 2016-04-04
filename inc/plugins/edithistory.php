@@ -152,6 +152,7 @@ function edithistory_activate()
 {
 	global $db;
 
+	// Insert settings
 	$insertarray = array(
 		'name' => 'edithistory',
 		'title' => 'Edit History Settings',
@@ -238,6 +239,7 @@ function edithistory_activate()
 
 	rebuild_settings();
 
+	// Insert templates
 	$insert_array = array(
 		'title'		=> 'edithistory',
 		'template'	=> $db->escape_string('<html>
@@ -446,6 +448,7 @@ padding: 2px;
 	);
 	$db->insert_query("templates", $insert_array);
 
+	// Insert task
 	require_once MYBB_ROOT."inc/functions_task.php";
 	$subscription_insert = array(
 		"title"			=> "Edit History Pruning",
@@ -464,6 +467,7 @@ padding: 2px;
 	$subscription_insert['nextrun'] = fetch_next_run($subscription_insert);
 	$db->insert_query("tasks", $subscription_insert);
 
+	// Update templates
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
