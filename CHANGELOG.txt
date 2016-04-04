@@ -1,3 +1,13 @@
+1.2 (April 4th, 2016)
+- Added setting for edit IP addresses viewing
+- Added pruning task (Issue #2)
+- Added 24 hour lock to edit history pruning (Issue #3)
+- Updated breadcrumb to use thread subject instead of post subject
+- Added (int) to editsperpage setting check
+- Bug: Fixed Edit History link not showing up when quick editing (Issue #4)
+- Bug: Fixed bad words are not filtered in subjects, messages and reasons (Issue #5)
+- Indented templates and other file cleanup
+
 1.1 (February 20th, 2015)
 - Added PostgreSQL and SQLite support
 - Using generate_numeric_field function
