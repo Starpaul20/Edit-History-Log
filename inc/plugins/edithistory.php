@@ -553,21 +553,21 @@ function edithistory_xmlhttp()
 // Delete logs if post is deleted
 function edithistory_delete_post($pid)
 {
-	global $db, $mybb;
+	global $db;
 	$db->delete_query("edithistory", "pid='{$pid}'");
 }
 
 // Delete logs if thread is deleted
 function edithistory_delete_thread($tid)
 {
-	global $db, $mybb;
+	global $db;
 	$db->delete_query("edithistory", "tid='{$tid}'");
 }
 
 // Update tid if threads are merged
 function edithistory_merge_thread($arguments)
 {
-	global $db, $mybb;
+	global $db;
 	$sqlarray = array(
 		"tid" => "{$arguments['tid']}",
 	);
@@ -577,7 +577,7 @@ function edithistory_merge_thread($arguments)
 // Update tid if post(s) are split
 function edithistory_split_post($arguments)
 {
-	global $db, $mybb;
+	global $db;
 	$pids = array_map('intval', $arguments['pids']);
 	$pids_list = implode(',', $pids);
 
@@ -628,7 +628,7 @@ function edithistory_online_activity($user_activity)
 
 function edithistory_online_location($plugin_array)
 {
-    global $db, $mybb, $lang, $parameters;
+	global $lang;
 	$lang->load("edithistory");
 
 	if($plugin_array['user_activity']['activity'] == "edithistory_compare")
@@ -656,7 +656,7 @@ function edithistory_delete($delete)
 // Update edit history user if users are merged
 function edithistory_merge()
 {
-	global $db, $mybb, $source_user, $destination_user;
+	global $db, $source_user, $destination_user;
 
 	$uid = array(
 		"uid" => $destination_user['uid']
@@ -684,7 +684,7 @@ function edithistory_admin_action_handler($actions)
 
 function edithistory_admin_permissions($admin_permissions)
 {
-  	global $db, $mybb, $lang;
+	global $lang;
 	$lang->load("tools_edithistory");
 
 	$admin_permissions['edithistory'] = $lang->can_manage_edit_history;
