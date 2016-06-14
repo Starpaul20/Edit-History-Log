@@ -162,6 +162,8 @@ if($mybb->input['action'] == "view")
 	$edit['originaltext'] = nl2br(htmlspecialchars_uni($parser->parse_badwords($edit['originaltext'])));
 
 	$dateline = my_date('relative', $edit['dateline']);
+
+	$edit['username'] = htmlspecialchars_uni($edit['username']);
 	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
 
 	$ipaddress = '';
@@ -293,6 +295,7 @@ if(!$mybb->input['action'])
 			eval("\$ipaddress = \"".$templates->get("edithistory_item_ipaddress")."\";");
 		}
 
+		$history['username'] = htmlspecialchars_uni($history['username']);
 		$history['username'] = build_profile_link($history['username'], $history['uid']);
 		$dateline = my_date('relative', $history['dateline']);
 
