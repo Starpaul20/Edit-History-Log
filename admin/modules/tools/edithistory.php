@@ -115,7 +115,7 @@ if($mybb->input['action'] == 'prune')
 	");
 	while($thread = $db->fetch_array($query2))
 	{
-		$thread_options[$thread['tid']] = $thread['subject'];
+		$thread_options[$thread['tid']] = htmlspecialchars_uni($thread['subject']);
 	}
 
 	$form = new Form("index.php?module=tools-edithistory&amp;action=prune", "post");
@@ -314,7 +314,7 @@ if(!$mybb->input['action'])
 	");
 	while($thread = $db->fetch_array($query2))
 	{
-		$thread_options[$thread['tid']] = $thread['subject'];
+		$thread_options[$thread['tid']] = htmlspecialchars_uni($thread['subject']);
 	}
 
 	$sort_by = array(
