@@ -34,6 +34,8 @@ $plugins->add_hook("build_friendly_wol_location_end", "edithistory_online_locati
 $plugins->add_hook("datahandler_user_delete_content", "edithistory_delete");
 
 $plugins->add_hook("admin_user_users_merge_commit", "edithistory_merge");
+$plugins->add_hook("admin_tools_recount_rebuild", "edithistory_do_recount");
+$plugins->add_hook("admin_tools_recount_rebuild_output_list", "edithistory_recount");
 $plugins->add_hook("admin_tools_menu_logs", "edithistory_admin_menu");
 $plugins->add_hook("admin_tools_action_handler", "edithistory_admin_action_handler");
 $plugins->add_hook("admin_tools_permissions", "edithistory_admin_permissions");
@@ -709,6 +711,74 @@ function edithistory_merge()
 		"uid" => $destination_user['uid']
 	);	
 	$db->update_query("edithistory", $uid, "uid='{$source_user['uid']}'");
+}
+
+// Actually recount edit count
+function edithistory_do_recount()
+{
+	global $db, $mybb, $lang;
+	$lang->load("tools_edithistory");
+
+	if($mybb->request_method == "post")
+	{
+		if(!isset($mybb->input['page']) || $mybb->get_input('page', MyBB::INPUT_INT) < 1)
+		{
+			$mybb->input['page'] = 1;
+		}
+
+		if(isset($mybb->input['do_recounteditcount']))
+		{
+			if($mybb->input['page'] == 1)
+			{
+				// Log admin action
+				log_admin_action("editcount");
+			}
+
+			if(!$mybb->get_input('editcount', MyBB::INPUT_INT))
+			{
+				$mybb->input['editcount'] = 500;
+			}
+
+			$query = $db->simple_select("posts", "COUNT(pid) as num_posts");
+			$num_posts = $db->fetch_field($query, 'num_posts');
+
+			$page = $mybb->get_input('page', MyBB::INPUT_INT);
+			$per_page = $mybb->get_input('editcount', MyBB::INPUT_INT);
+			if($per_page <= 0)
+			{
+				$per_page = 500;
+			}
+			$start = ($page-1) * $per_page;
+			$end = $start + $per_page;
+
+			$query = $db->simple_select("posts", "pid", '', array('order_by' => 'pid', 'order_dir' => 'asc', 'limit_start' => $start, 'limit' => $per_page));
+			while($post = $db->fetch_array($query))
+			{
+				$query2 = $db->query("
+					SELECT COUNT(eid) as num_edits
+					FROM ".TABLE_PREFIX."edithistory
+					WHERE pid='{$post['pid']}'
+				");
+				$num_edits = $db->fetch_field($query2, "num_edits");
+
+				$db->update_query("posts", array("editcount" => (int)$num_edits), "pid='{$post['pid']}'");
+			}
+
+			check_proceed($num_posts, $end, ++$page, $per_page, "editcount", "do_recounteditcount", $lang->success_rebuilt_editcount);
+		}
+	}
+}
+
+// Recount edit count
+function edithistory_recount()
+{
+	global $lang, $form_container, $form;
+	$lang->load("tools_edithistory");
+
+	$form_container->output_cell("<label>{$lang->recount_editcount}</label><div class=\"description\">{$lang->recount_editcount_desc}</div>");
+	$form_container->output_cell($form->generate_numeric_field("editcount", 500, array('style' => 'width: 150px;', 'min' => 0)));
+	$form_container->output_cell($form->generate_submit_button($lang->go, array("name" => "do_recounteditcount")));
+	$form_container->construct_row();
 }
 
 // Admin CP log page
