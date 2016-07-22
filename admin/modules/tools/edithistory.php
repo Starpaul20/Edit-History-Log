@@ -48,21 +48,17 @@ if($mybb->input['action'] == 'prune')
 			$where .= " AND tid='".$mybb->get_input('tid', MyBB::INPUT_INT)."'";
 		}
 
-		$update_array = array(
-			"hashistory" => 0
-		);
-		$db->update_query("posts", $update_array);
-
-		$db->delete_query("edithistory", $where);
-		$num_deleted = $db->affected_rows();
-
-		$query = $db->simple_select("edithistory", "DISTINCT pid");
+		$num_deleted = 0;
+		$query = $db->simple_select("edithistory", "eid, pid", $where);
 		while($history = $db->fetch_array($query))
 		{
+			++$num_deleted;
+			$db->delete_query("edithistory", "eid='{$history['eid']}'");
+
 			$update_array = array(
-				"hashistory" => 1
+				"editcount" => "editcount-1"
 			);
-			$db->update_query("posts", $update_array, "pid='{$history['pid']}'");
+			$db->update_query("posts", $update_array, "pid='{$history['pid']}'", 1, true);
 		}
 
 		// Log admin action

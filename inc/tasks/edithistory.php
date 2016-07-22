@@ -13,11 +13,16 @@ function task_edithistory($task)
 	if((int)$mybb->settings['edithistorypruning'] > 0)
 	{
 		$cut = TIME_NOW-((int)$mybb->settings['edithistorypruning']*60*60*24);
-	
-		$query = $db->simple_select("edithistory", "eid", "dateline < '".(int)$cut."'");
+
+		$query = $db->simple_select("edithistory", "eid, pid", "dateline < '".(int)$cut."'");
 		while($history = $db->fetch_array($query))
 		{
 			$db->delete_query("edithistory", "eid='{$history['eid']}'");
+
+			$update_array = array(
+				"editcount" => "editcount-1"
+			);
+			$db->update_query("posts", $update_array, "pid='{$history['pid']}'", 1, true);
 		}
 	}
 

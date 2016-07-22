@@ -113,10 +113,13 @@ function edithistory_install()
 	switch($db->type)
 	{
 		case "pgsql":
-			$db->add_column("posts", "hashistory", "smallint NOT NULL default '0'");
+			$db->add_column("posts", "editcount", "smallint NOT NULL default '0'");
+			break;
+		case "sqlite":
+			$db->add_column("posts", "editcount", "smallint(5) NOT NULL default '0'");
 			break;
 		default:
-			$db->add_column("posts", "hashistory", "tinyint(1) NOT NULL default '0'");
+			$db->add_column("posts", "editcount", "smallint(5) unsigned NOT NULL default '0'");
 			break;
 	}
 }
@@ -141,6 +144,11 @@ function edithistory_uninstall()
 		$db->drop_table("edithistory");
 	}
 
+	if($db->field_exists("editcount", "posts"))
+	{
+		$db->drop_column("posts", "editcount");
+	}
+
 	if($db->field_exists("hashistory", "posts"))
 	{
 		$db->drop_column("posts", "hashistory");
@@ -151,6 +159,41 @@ function edithistory_uninstall()
 function edithistory_activate()
 {
 	global $db;
+
+	// Upgrade support (from 1.2 to 1.3)
+	if(!$db->field_exists("editcount", "posts"))
+	{
+		switch($db->type)
+		{
+			case "pgsql":
+				$db->add_column("posts", "editcount", "smallint NOT NULL default '0'");
+				break;
+			case "sqlite":
+				$db->add_column("posts", "editcount", "smallint(5) NOT NULL default '0'");
+				break;
+			default:
+				$db->add_column("posts", "editcount", "smallint(5) unsigned NOT NULL default '0'");
+				break;
+		}
+
+		$query = $db->simple_select("edithistory", "DISTINCT pid");
+		while($history = $db->fetch_array($query))
+		{
+			$query2 = $db->query("
+				SELECT COUNT(eid) as num_edits
+				FROM ".TABLE_PREFIX."edithistory
+				WHERE pid='{$history['pid']}'
+			");
+			$num_edits = $db->fetch_field($query2, "num_edits");
+
+			$db->update_query("posts", array("editcount" => (int)$num_edits), "pid='{$history['pid']}'");
+		}
+
+		if($db->field_exists("hashistory", "posts"))
+		{
+			$db->drop_column("posts", "hashistory");
+		}
+	}
 
 	// Insert settings
 	$insertarray = array(
@@ -512,10 +555,10 @@ function edithistory_run()
 	);
 	$db->insert_query("edithistory", $edit_history);
 
-	$reason = array(
-		"hashistory" => 1,
+	$edit_count = array(
+		"editcount" => (int)$edit['editcount'] + 1,
 	);
-	$db->update_query("posts", $reason, "pid='{$edit['pid']}'");
+	$db->update_query("posts", $edit_count, "pid='{$edit['pid']}'");
 }
 
 // Display log link on postbit (mods/admins only)
@@ -527,7 +570,7 @@ function edithistory_postbit($post)
 	$post['edithistory'] = '';
 	if(is_moderator($fid, "caneditposts"))
 	{
-		if($post['hashistory'] == 1 && ($mybb->settings['editmodvisibility'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editmodvisibility'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editmodvisibility'] == 0))
+		if($post['editcount'] > 0 && ($mybb->settings['editmodvisibility'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editmodvisibility'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editmodvisibility'] == 0))
 		{
 			eval("\$post['edithistory'] = \"".$templates->get("postbit_edithistory")."\";");
 		}
