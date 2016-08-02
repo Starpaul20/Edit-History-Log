@@ -282,6 +282,17 @@ function edithistory_activate()
 	);
 	$db->insert_query("settings", $insertarray);
 
+	$insertarray = array(
+		'name' => 'edithistorycount',
+		'title' => 'Display Edit Count on posts',
+		'description' => 'Diplay the number of edits that have been made to a post. Edited By messages must also be enabled.',
+		'optionscode' => 'yesno',
+		'value' => 1,
+		'disporder' => 7,
+		'gid' => $gid
+	);
+	$db->insert_query("settings", $insertarray);
+
 	rebuild_settings();
 
 	// Insert templates
@@ -516,6 +527,7 @@ padding: 2px;
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
+	find_replace_templatesets("postbit_editedby", "#".preg_quote('{$editreason}')."#i", '<!-- editcount -->{$editreason}');
 
 	change_admin_permission('tools', 'edithistory');
 }
@@ -524,7 +536,7 @@ padding: 2px;
 function edithistory_deactivate()
 {
 	global $db;
-	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editipaddress','editsperpages','edithistorychar','edithistorypruning')");
+	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editipaddress','editsperpages','edithistorychar','edithistorypruning','edithistorycount')");
 	$db->delete_query("settinggroups", "name IN('edithistory')");
 	$db->delete_query("templates", "title IN('edithistory','edithistory_ipaddress','edithistory_nohistory','edithistory_item','edithistory_item_ipaddress','edithistory_item_revert','edithistory_item_readmore','postbit_edithistory','edithistory_comparison','edithistory_view','edithistory_view_ipaddress')");
 	$db->delete_query("tasks", "file='edithistory'");
@@ -533,6 +545,7 @@ function edithistory_deactivate()
 	include MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'edithistory\']}')."#i", '', 0);
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'edithistory\']}')."#i", '', 0);
+	find_replace_templatesets("postbit_editedby", "#".preg_quote('<!-- editcount -->')."#i", '', 0);
 
 	change_admin_permission('tools', 'edithistory', -1);
 }
@@ -578,6 +591,22 @@ function edithistory_postbit($post)
 		}
 	}
 
+	$edited_by_count = '';
+	if($mybb->settings['edithistorycount'] == 1 && $post['editcount'] > 0)
+	{
+		if($post['editcount'] == 1)
+		{
+			$edited_by_count = $lang->edited_time_total;
+		}
+		else
+		{
+			$post['editcount'] = my_number_format($post['editcount']);
+			$edited_by_count = $lang->sprintf($lang->edited_times_total, $post['editcount']);
+		}
+
+		$post['editedmsg'] = str_replace("<!-- editcount -->", $edited_by_count, $post['editedmsg']);
+	}
+
 	return $post;
 }
 
@@ -594,6 +623,24 @@ function edithistory_xmlhttp()
 		{
 			eval("\$edithistory = \"".$templates->get("postbit_edithistory")."\";");
 		}
+	}
+
+	$edited_by_count = '';
+	if($mybb->settings['edithistorycount'] == 1)
+	{
+		$post['editcount'] = $post['editcount'] + 1;
+
+		if($post['editcount'] == 1)
+		{
+			$edited_by_count = $lang->edited_time_total;
+		}
+		else
+		{
+			$post['editcount'] = my_number_format($post['editcount']);
+			$edited_by_count = $lang->sprintf($lang->edited_times_total, $post['editcount']);
+		}
+
+		$editedmsg_response = str_replace("<!-- editcount -->", $edited_by_count, $editedmsg_response);
 	}
 
 	$editedmsg_response .= $edithistory;

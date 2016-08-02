@@ -9,6 +9,9 @@ $l['edithistory_info_desc'] = "Allows you to log all edits made to posts.";
 
 $l['edit_history_pruning_ran'] = "The edit history pruning task successfully ran.";
 
+$l['edited_time_total'] = " Edited 1 time in total.";
+$l['edited_times_total'] = " Edited {1} times in total.";
+
 $l['error_invalidpost'] = "The specified post does not exist.";
 $l['error_invalidforum'] = "Invalid forum";
 $l['nav_edithistory'] = "Edit History";
