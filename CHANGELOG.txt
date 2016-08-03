@@ -1,3 +1,9 @@
+1.3 (August 3rd, 2016)
+- Added number of logged edits per post (Issue #6)
+- Added display of edit count on posts (Issue #7)
+- Bug: Fixed XSS issue with thread titles in Admin CP
+- Sanitized usernames
+
 1.2 (April 4th, 2016)
 - Added setting for edit IP addresses viewing
 - Added pruning task (Issue #2)
