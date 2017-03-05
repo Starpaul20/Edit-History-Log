@@ -296,6 +296,18 @@ min=0',
 	);
 	$db->insert_query("settings", $insertarray);
 
+	$insertarray = array(
+		'name' => 'edithistorytime',
+		'title' => 'Minimum Time For Logging Edits',
+		'description' => 'The number of seconds after a post has been made before edits are logged. Set to 0 to log all edits regardless of time.',
+		'optionscode' => 'numeric
+min=0',
+		'value' => 30,
+		'disporder' => 8,
+		'gid' => $gid
+	);
+	$db->insert_query("settings", $insertarray);
+
 	rebuild_settings();
 
 	// Insert templates
@@ -539,7 +551,7 @@ padding: 2px;
 function edithistory_deactivate()
 {
 	global $db;
-	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editipaddress','editsperpages','edithistorychar','edithistorypruning','edithistorycount')");
+	$db->delete_query("settings", "name IN('editmodvisibility','editrevert','editipaddress','editsperpages','edithistorychar','edithistorypruning','edithistorycount','edithistorytime')");
 	$db->delete_query("settinggroups", "name IN('edithistory')");
 	$db->delete_query("templates", "title IN('edithistory','edithistory_ipaddress','edithistory_nohistory','edithistory_item','edithistory_item_ipaddress','edithistory_item_revert','edithistory_item_readmore','postbit_edithistory','edithistory_comparison','edithistory_view','edithistory_view_ipaddress')");
 	$db->delete_query("tasks", "file='edithistory'");
@@ -559,24 +571,28 @@ function edithistory_run()
 	global $db, $mybb, $post, $session;
 	$edit = get_post($post['pid']);
 	$mybb->binary_fields["edithistory"] = array('ipaddress' => true);
+	$time = TIME_NOW;
 
 	// Insert original message into edit history
-	$edit_history = array(
-		"pid" => (int)$edit['pid'],
-		"tid" => (int)$edit['tid'],
-		"uid" => (int)$mybb->user['uid'],
-		"dateline" => TIME_NOW,
-		"originaltext" => $db->escape_string($edit['message']),
-		"subject" => $db->escape_string($edit['subject']),
-		"ipaddress" => $db->escape_binary($session->packedip),
-		"reason" => $db->escape_string($mybb->input['editreason'])
-	);
-	$db->insert_query("edithistory", $edit_history);
+	if($mybb->settings['edithistorytime'] == 0 || ($edit['dateline'] < ($time - $mybb->settings['edithistorytime'])))
+	{
+		$edit_history = array(
+			"pid" => (int)$edit['pid'],
+			"tid" => (int)$edit['tid'],
+			"uid" => (int)$mybb->user['uid'],
+			"dateline" => TIME_NOW,
+			"originaltext" => $db->escape_string($edit['message']),
+			"subject" => $db->escape_string($edit['subject']),
+			"ipaddress" => $db->escape_binary($session->packedip),
+			"reason" => $db->escape_string($mybb->input['editreason'])
+		);
+		$db->insert_query("edithistory", $edit_history);
 
-	$edit_count = array(
-		"editcount" => (int)$edit['editcount'] + 1,
-	);
-	$db->update_query("posts", $edit_count, "pid='{$edit['pid']}'");
+		$edit_count = array(
+			"editcount" => (int)$edit['editcount'] + 1,
+		);
+		$db->update_query("posts", $edit_count, "pid='{$edit['pid']}'");
+	}
 }
 
 // Display log link on postbit (mods/admins only)
@@ -618,18 +634,19 @@ function edithistory_xmlhttp()
 {
 	global $mybb, $lang, $templates, $post, $editedmsg_response;
 	$lang->load("edithistory");
+	$time = TIME_NOW;
 
 	$edithistory = '';
 	if(is_moderator($post['fid'], "caneditposts"))
 	{
-		if($mybb->settings['editmodvisibility'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editmodvisibility'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editmodvisibility'] == 0)
+		if(($mybb->settings['editmodvisibility'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editmodvisibility'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editmodvisibility'] == 0) && ($mybb->settings['edithistorytime'] == 0 || $post['dateline'] < ($time - $mybb->settings['edithistorytime'])))
 		{
 			eval("\$edithistory = \"".$templates->get("postbit_edithistory")."\";");
 		}
 	}
 
 	$edited_by_count = '';
-	if($mybb->settings['edithistorycount'] == 1)
+	if($mybb->settings['edithistorycount'] == 1 && ($mybb->settings['edithistorytime'] == 0 || $post['dateline'] < ($time - $mybb->settings['edithistorytime'])))
 	{
 		$post['editcount'] = $post['editcount'] + 1;
 
