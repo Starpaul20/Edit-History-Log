@@ -55,5 +55,3 @@ $l['from_user'] = "From User:";
 $l['in'] = "in";
 $l['order'] = "order";
 $l['order_added'] = "Order Added";
-
-?>

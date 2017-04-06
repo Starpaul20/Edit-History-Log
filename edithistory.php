@@ -343,5 +343,3 @@ if(!$mybb->input['action'])
 	eval("\$edithistory = \"".$templates->get("edithistory")."\";");
 	output_page($edithistory);
 }
-
-?>

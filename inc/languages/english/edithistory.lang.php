@@ -49,5 +49,3 @@ $l['highlight_deleted'] = "Text that has been deleted is hightlighted in <del>re
 
 $l['revert_post_confirm'] = "Are you sure you wish to revert this post?";
 $l['redirect_postreverted'] = "Thank you, this post has been reverted.<br />You will now be taken to the post.";
-
-?>

@@ -28,4 +28,3 @@ function task_edithistory($task)
 
 	add_task_log($task, $lang->edit_history_pruning_ran);
 }
-?>
