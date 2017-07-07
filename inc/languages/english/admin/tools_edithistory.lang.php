@@ -36,6 +36,7 @@ $l['thread'] = "Thread:";
 $l['post'] = "Post:";
 
 $l['username'] = "Username";
+$l['na_deleted'] = "N/A - Been Deleted";
 $l['edit_date'] = "Edit Date";
 $l['ipaddress'] = "IP Address";
 $l['information'] = "Information";

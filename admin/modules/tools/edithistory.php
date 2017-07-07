@@ -97,6 +97,12 @@ if($mybb->input['action'] == 'prune')
 	");
 	while($user = $db->fetch_array($query))
 	{
+		// Deleted Users
+		if(!$user['username'])
+		{
+			$user['username'] = htmlspecialchars_uni($lang->na_deleted);
+		}
+
 		$user_options[$user['uid']] = htmlspecialchars_uni($user['username']);
 	}
 
@@ -111,6 +117,12 @@ if($mybb->input['action'] == 'prune')
 	");
 	while($thread = $db->fetch_array($query2))
 	{
+		// Deleted Threads
+		if(!$thread['subject'])
+		{
+			$thread['subject'] = htmlspecialchars_uni($lang->na_deleted);
+		}
+
 		$thread_options[$thread['tid']] = htmlspecialchars_uni($thread['subject']);
 	}
 
@@ -241,9 +253,16 @@ if(!$mybb->input['action'])
 		$logitem['dateline'] = my_date('relative', $logitem['dateline']);
 		$trow = alt_trow();
 
-		$logitem['username'] = htmlspecialchars_uni($logitem['username']);
-		$username = format_name($logitem['username'], $logitem['usergroup'], $logitem['displaygroup']);
-		$logitem['profilelink'] = build_profile_link($username, $logitem['uid']);
+		if($logitem['username'])
+		{
+			$username = format_name(htmlspecialchars_uni($logitem['username']), $logitem['usergroup'], $logitem['displaygroup']);
+			$logitem['profilelink'] = build_profile_link($username, $logitem['uid']);
+		}
+		else
+		{
+			$username = $logitem['profilelink'] = $logitem['username'] = htmlspecialchars_uni($lang->na_deleted);
+		}
+
 		if($logitem['tsubject'])
 		{
 			$information = "<strong>{$lang->thread}</strong> <a href=\"../".get_thread_link($logitem['tid'])."\" target=\"_blank\">".htmlspecialchars_uni($logitem['tsubject'])."</a><br />";
@@ -252,6 +271,7 @@ if(!$mybb->input['action'])
 		{
 			$information .= "<strong>{$lang->post}</strong> <a href=\"../".get_post_link($logitem['pid'])."#pid{$logitem['pid']}\">".htmlspecialchars_uni($logitem['subject'])."</a>";
 		}
+
 		$logitem['reason'] = htmlspecialchars_uni($logitem['reason']);
 
 		$table->construct_cell($logitem['profilelink']);
@@ -291,6 +311,12 @@ if(!$mybb->input['action'])
 	");
 	while($user = $db->fetch_array($query))
 	{
+		// Deleted Users
+		if(!$user['username'])
+		{
+			$user['username'] = htmlspecialchars_uni($lang->na_deleted);
+		}
+
 		$selected = '';
 		if($mybb->input['uid'] == $user['uid'])
 		{
@@ -310,6 +336,12 @@ if(!$mybb->input['action'])
 	");
 	while($thread = $db->fetch_array($query2))
 	{
+		// Deleted Threads
+		if(!$thread['subject'])
+		{
+			$thread['subject'] = htmlspecialchars_uni($lang->na_deleted);
+		}
+
 		$thread_options[$thread['tid']] = htmlspecialchars_uni($thread['subject']);
 	}
 
