@@ -163,8 +163,15 @@ if($mybb->input['action'] == "view")
 
 	$dateline = my_date('relative', $edit['dateline']);
 
-	$edit['username'] = format_name(htmlspecialchars_uni($edit['username']), $edit['usergroup'], $edit['displaygroup']);
-	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
+	if($edit['username'])
+	{
+		$edit['username'] = format_name(htmlspecialchars_uni($edit['username']), $edit['usergroup'], $edit['displaygroup']);
+		$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
+	}
+	else
+	{
+		$edit['username'] = htmlspecialchars_uni($lang->na_deleted);
+	}
 
 	$ipaddress = '';
 	if(is_moderator($fid, "canviewips") && ($mybb->settings['editipaddress'] == 2 && $mybb->usergroup['cancp'] == 1 || $mybb->settings['editipaddress'] == 1 && ($mybb->usergroup['issupermod'] == 1 || $mybb->usergroup['cancp'] == 1) || $mybb->settings['editipaddress'] == 0))
@@ -295,8 +302,16 @@ if(!$mybb->input['action'])
 			eval("\$ipaddress = \"".$templates->get("edithistory_item_ipaddress")."\";");
 		}
 
-		$history['username'] = format_name(htmlspecialchars_uni($history['username']), $history['usergroup'], $history['displaygroup']);
-		$history['username'] = build_profile_link($history['username'], $history['uid']);
+		if($history['username'])
+		{
+			$history['username'] = format_name(htmlspecialchars_uni($history['username']), $history['usergroup'], $history['displaygroup']);
+			$history['username'] = build_profile_link($history['username'], $history['uid']);
+		}
+		else
+		{
+			$history['username'] = htmlspecialchars_uni($lang->na_deleted);
+		}
+
 		$dateline = my_date('relative', $history['dateline']);
 
 		// Sanitize post
