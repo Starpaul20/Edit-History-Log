@@ -136,7 +136,7 @@ if($mybb->input['action'] == "view")
 	add_breadcrumb($lang->view_original_text, "edithistory.php?action=view&pid={$pid}");
 
 	$query = $db->query("
-		SELECT e.*, u.username
+		SELECT e.*, u.username, u.usergroup, u.displaygroup
 		FROM ".TABLE_PREFIX."edithistory e
 		LEFT JOIN ".TABLE_PREFIX."users u ON (e.uid=u.uid)
 		WHERE e.eid='".$mybb->get_input('eid', MyBB::INPUT_INT)."'
@@ -163,7 +163,7 @@ if($mybb->input['action'] == "view")
 
 	$dateline = my_date('relative', $edit['dateline']);
 
-	$edit['username'] = htmlspecialchars_uni($edit['username']);
+	$edit['username'] = format_name(htmlspecialchars_uni($edit['username']), $edit['usergroup'], $edit['displaygroup']);
 	$edit['username'] = build_profile_link($edit['username'], $edit['uid']);
 
 	$ipaddress = '';
@@ -269,7 +269,7 @@ if(!$mybb->input['action'])
 	$multipage = multipage($history_count, $perpage, $page, "edithistory.php?pid={$pid}");
 
 	$query = $db->query("
-		SELECT e.*, u.username
+		SELECT e.*, u.username, u.usergroup, u.displaygroup
 		FROM ".TABLE_PREFIX."edithistory e
 		LEFT JOIN ".TABLE_PREFIX."users u ON (e.uid=u.uid)
 		WHERE e.pid='{$pid}'
@@ -295,7 +295,7 @@ if(!$mybb->input['action'])
 			eval("\$ipaddress = \"".$templates->get("edithistory_item_ipaddress")."\";");
 		}
 
-		$history['username'] = htmlspecialchars_uni($history['username']);
+		$history['username'] = format_name(htmlspecialchars_uni($history['username']), $history['usergroup'], $history['displaygroup']);
 		$history['username'] = build_profile_link($history['username'], $history['uid']);
 		$dateline = my_date('relative', $history['dateline']);
 
