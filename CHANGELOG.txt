@@ -1,3 +1,11 @@
+1.4 (July 12th, 2017)
+- Added minimum time before Edit is logged (Issue #9)
+- Removed PHP closing tags
+- Use THIS_SCRIPT for template caching
+- Handle display of deleted users/threads in logs
+- Format usernames
+- Updated numeric settings
+
 1.3 (August 3rd, 2016)
 - Added number of logged edits per post (Issue #6)
 - Added display of edit count on posts (Issue #7)
