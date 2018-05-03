@@ -187,6 +187,9 @@ if($mybb->input['action'] == "view")
 // Revert edited post
 if($mybb->input['action'] == "revert")
 {
+	// Verify incoming POST request
+	verify_post_check($mybb->get_input('my_post_key'));
+
 	// First, determine if they can revert edit
 	if($mybb->settings['editrevert'] == 2 && $mybb->usergroup['cancp'] != 1)
 	{

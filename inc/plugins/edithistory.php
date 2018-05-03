@@ -393,7 +393,7 @@ min=0',
 
 	$insert_array = array(
 		'title'		=> 'edithistory_item_revert',
-		'template'	=> $db->escape_string(' | <a href="edithistory.php?action=revert&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}" title="{$lang->revert_current_post}" onclick="if(confirm(&quot;{$lang->revert_post_confirm}&quot;))window.location=this.href.replace(\'action=revert\',\'action=revert\');return false;">{$lang->revert}</a>'),
+		'template'	=> $db->escape_string(' | <a href="edithistory.php?action=revert&amp;pid={$history[\'pid\']}&amp;eid={$history[\'eid\']}&amp;my_post_key={$mybb->post_code}" title="{$lang->revert_current_post}" onclick="if(confirm(&quot;{$lang->revert_post_confirm}&quot;))window.location=this.href.replace(\'action=revert\',\'action=revert\');return false;">{$lang->revert}</a>'),
 		'sid'		=> '-1',
 		'version'	=> '',
 		'dateline'	=> TIME_NOW
