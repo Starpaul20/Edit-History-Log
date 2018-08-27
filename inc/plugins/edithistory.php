@@ -882,19 +882,19 @@ function edithistory_admin_adminlog($plugin_array)
 	global $lang;
 	$lang->load("tools_edithistory");
 
-	if($plugin_array['lang_string'] == admin_log_tools_edithistory_prune)
+	if($plugin_array['lang_string'] == 'admin_log_tools_edithistory_prune')
 	{
 		if($plugin_array['logitem']['data'][1] && !$plugin_array['logitem']['data'][2])
 		{
-			$plugin_array['lang_string'] = admin_log_tools_edithistory_prune_user;
+			$plugin_array['lang_string'] = 'admin_log_tools_edithistory_prune_user';
 		}
 		elseif($plugin_array['logitem']['data'][2] && !$plugin_array['logitem']['data'][1])
 		{
-			$plugin_array['lang_string'] = admin_log_tools_edithistory_prune_thread;
+			$plugin_array['lang_string'] = 'admin_log_tools_edithistory_prune_thread';
 		}
 		elseif($plugin_array['logitem']['data'][1] && $plugin_array['logitem']['data'][2])
 		{
-			$plugin_array['lang_string'] = admin_log_tools_edithistory_prune_user_thread;
+			$plugin_array['lang_string'] = 'admin_log_tools_edithistory_prune_user_thread';
 		}
 	}
 
