@@ -587,7 +587,7 @@ function edithistory_run()
 			"originaltext" => $db->escape_string($edit['message']),
 			"subject" => $db->escape_string($edit['subject']),
 			"ipaddress" => $db->escape_binary($session->packedip),
-			"reason" => $db->escape_string($mybb->input['editreason'])
+			"reason" => $db->escape_string($mybb->get_input('editreason'))
 		);
 		$db->insert_query("edithistory", $edit_history);
 
