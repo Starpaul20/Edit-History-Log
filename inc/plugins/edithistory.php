@@ -542,7 +542,7 @@ padding: 2px;
 	$db->insert_query("tasks", $subscription_insert);
 
 	// Update templates
-	include MYBB_ROOT."/inc/adminfunctions_templates.php";
+	require_once MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
 	find_replace_templatesets("postbit_editedby", "#".preg_quote('{$editreason}')."#i", '<!-- editcount -->{$editreason}');
@@ -560,7 +560,7 @@ function edithistory_deactivate()
 	$db->delete_query("tasks", "file='edithistory'");
 	rebuild_settings();
 
-	include MYBB_ROOT."/inc/adminfunctions_templates.php";
+	require_once MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'edithistory\']}')."#i", '', 0);
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'edithistory\']}')."#i", '', 0);
 	find_replace_templatesets("postbit_editedby", "#".preg_quote('<!-- editcount -->')."#i", '', 0);
