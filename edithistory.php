@@ -113,13 +113,31 @@ if($mybb->input['action'] == "compare")
 	require_once MYBB_ROOT."inc/3rdparty/diff/Diff/Renderer.php";
 	require_once MYBB_ROOT."inc/3rdparty/diff/Diff/Renderer/Inline.php";
 
+	$newer_message = $post['message'];
+
+	$timecut = (int)$editlog['dateline'];
+
+	$query = $db->simple_select('edithistory', '*', "dateline>'{$timecut}' AND pid='{$pid}'", [
+		'limit' => 1,
+		'order_by' => 'dateline, eid',
+		'order_dir' => 'asc'
+	]);
+
+	if($db->num_rows($query))
+	{
+		$newer_message = (string)$db->fetch_field($query, 'originaltext');
+	}
+
 	$message1 = explode("\n", $editlog['originaltext']);
-	$message2 = explode("\n", $post['message']);
+	$message2 = explode("\n", $newer_message);
+
+	$message1 = array_map('rtrim', $message1);
+	$message2 = array_map('rtrim', $message2);
 
 	$diff = new Horde_Text_Diff('auto', array($message1, $message2));
 	$renderer = new Horde_Text_Diff_Renderer_Inline();
 
-	if($editlog['originaltext'] == $post['message'])
+	if($message1 == $message2)
 	{
 		$comparison = $lang->post_same;
 	}
