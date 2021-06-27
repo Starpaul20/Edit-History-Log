@@ -129,6 +129,7 @@ if($mybb->input['action'] == "compare")
 	$message1 = explode("\n", $editlog['originaltext']);
 	$message2 = explode("\n", $newer_message);
 
+	$message1 = array_map('rtrim', $message1);
 	$message2 = array_map('rtrim', $message2);
 
 	$diff = new Horde_Text_Diff('auto', array($message1, $message2));
