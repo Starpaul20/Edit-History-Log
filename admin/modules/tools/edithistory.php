@@ -83,8 +83,8 @@ if($mybb->input['action'] == 'prune')
 	$page->output_nav_tabs($sub_tabs, 'prune_edit_history');
 
 	// Fetch filter options
-	$sortbysel[$mybb->input['sortby']] = 'selected="selected"';
-	$ordersel[$mybb->input['order']] = 'selected="selected"';
+	$sortbysel[$mybb->get_input('sortby')] = 'selected="selected"';
+	$ordersel[$mybb->get_input('order')] = 'selected="selected"';
 
 	$user_options[''] = $lang->all_users;
 	$user_options['0'] = '----------';
@@ -128,14 +128,14 @@ if($mybb->input['action'] == 'prune')
 
 	$form = new Form("index.php?module=tools-edithistory&amp;action=prune", "post");
 	$form_container = new FormContainer($lang->prune_edit_history);
-	$form_container->output_row($lang->user, "", $form->generate_select_box('uid', $user_options, $mybb->input['uid'], array('id' => 'uid')), 'uid');
-	$form_container->output_row($lang->thread, "", $form->generate_select_box('tid', $thread_options, $mybb->input['tid'], array('id' => 'tid')), 'tid');
+	$form_container->output_row($lang->user, "", $form->generate_select_box('uid', $user_options, $mybb->get_input('uid'), array('id' => 'uid')), 'uid');
+	$form_container->output_row($lang->thread, "", $form->generate_select_box('tid', $thread_options, $mybb->get_input('tid'), array('id' => 'tid')), 'tid');
 
-	if(!$mybb->input['older_than'])
+	if(!$mybb->get_input('older_than'))
 	{
 		$mybb->input['older_than'] = '30';
 	}
-	$form_container->output_row($lang->date_range, "", $lang->older_than.$form->generate_numeric_field('older_than', $mybb->input['older_than'], array('id' => 'older_than', 'style' => 'width: 50px', 'min' => 0)).' '.$lang->days, 'older_than');
+	$form_container->output_row($lang->date_range, "", $lang->older_than.$form->generate_numeric_field('older_than', $mybb->get_input('older_than'), array('id' => 'older_than', 'style' => 'width: 50px', 'min' => 0)).' '.$lang->days, 'older_than');
 	$form_container->end();
 	$buttons[] = $form->generate_submit_button($lang->prune_edit_history);
 	$form->output_submit_wrapper($buttons);
@@ -164,19 +164,19 @@ if(!$mybb->input['action'])
 	$where = 'WHERE 1=1';
 
 	// Searching for entries by a particular user
-	if($mybb->input['uid'])
+	if($mybb->get_input('uid') > 0)
 	{
 		$where .= " AND e.uid='".$mybb->get_input('uid', MyBB::INPUT_INT)."'";
 	}
 
 	// Searching for entries in a specific thread
-	if($mybb->input['tid'])
+	if($mybb->get_input('tid') > 0)
 	{
 		$where .= " AND e.tid='".$mybb->get_input('tid', MyBB::INPUT_INT)."'";
 	}
 
 	// Order?
-	switch($mybb->input['sortby'])
+	switch($mybb->get_input('sortby'))
 	{
 		case "username":
 			$sortby = "u.username";
@@ -187,7 +187,7 @@ if(!$mybb->input['action'])
 		default:
 			$sortby = "e.dateline";
 	}
-	$order = $mybb->input['order'];
+	$order = $mybb->get_input('order');
 	if($order != "asc")
 	{
 		$order = "desc";
@@ -201,7 +201,7 @@ if(!$mybb->input['action'])
 	$rescount = $db->fetch_field($query, "count");
 
 	// Figure out if we need to display multiple pages.
-	if($mybb->input['page'] != "last")
+	if($mybb->get_input('page') != "last")
 	{
 		$pagecnt = $mybb->get_input('page', MyBB::INPUT_INT);
 	}
@@ -210,7 +210,7 @@ if(!$mybb->input['action'])
 	$pages = $postcount / $perpage;
 	$pages = ceil($pages);
 
-	if($mybb->input['page'] == "last")
+	if($mybb->get_input('page') == "last")
 	{
 		$pagecnt = $pages;
 	}
@@ -297,8 +297,8 @@ if(!$mybb->input['action'])
 	}
 
 	// Fetch filter options
-	$sortbysel[$mybb->input['sortby']] = "selected=\"selected\"";
-	$ordersel[$mybb->input['order']] = "selected=\"selected\"";
+	$sortbysel[$mybb->get_input('sortby')] = "selected=\"selected\"";
+	$ordersel[$mybb->get_input('order')] = "selected=\"selected\"";
 
 	$user_options[''] = $lang->all_users;
 	$user_options['0'] = '----------';
@@ -318,7 +318,7 @@ if(!$mybb->input['action'])
 		}
 
 		$selected = '';
-		if($mybb->input['uid'] == $user['uid'])
+		if($mybb->get_input('uid') == $user['uid'])
 		{
 			$selected = "selected=\"selected\"";
 		}
@@ -358,9 +358,9 @@ if(!$mybb->input['action'])
 
 	$form = new Form("index.php?module=tools-edithistory", "post");
 	$form_container = new FormContainer($lang->filter_edit_history);
-	$form_container->output_row($lang->user, "", $form->generate_select_box('uid', $user_options, $mybb->input['uid'], array('id' => 'uid')), 'uid');
-	$form_container->output_row($lang->thread, "", $form->generate_select_box('tid', $thread_options, $mybb->input['tid'], array('id' => 'tid')), 'tid');
-	$form_container->output_row($lang->sort_by, "", $form->generate_select_box('sortby', $sort_by, $mybb->input['sortby'], array('id' => 'sortby'))." {$lang->in} ".$form->generate_select_box('order', $order_array, $order, array('id' => 'order'))." {$lang->order}", 'order');
+	$form_container->output_row($lang->user, "", $form->generate_select_box('uid', $user_options, $mybb->get_input('uid'), array('id' => 'uid')), 'uid');
+	$form_container->output_row($lang->thread, "", $form->generate_select_box('tid', $thread_options, $mybb->get_input('tid'), array('id' => 'tid')), 'tid');
+	$form_container->output_row($lang->sort_by, "", $form->generate_select_box('sortby', $sort_by, $mybb->get_input('sortby'), array('id' => 'sortby'))." {$lang->in} ".$form->generate_select_box('order', $order_array, $order, array('id' => 'order'))." {$lang->order}", 'order');
 	$form_container->output_row($lang->results_per_page, "", $form->generate_numeric_field('perpage', $perpage, array('id' => 'perpage', 'min' => 1)), 'perpage');
 
 	$form_container->end();

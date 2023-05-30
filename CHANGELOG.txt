@@ -1,3 +1,12 @@
+1.6 (June 24th, 2021)
+- Added check to see if THIS_SCRIPT is defined
+- Fixed PHP 8.0 errors
+- Use require_once for template updates
+
+1.5 (January 2nd, 2019)
+- Bug: Fixed PHP 7.2 does not cast unquoted string literals to strings (Issue #11)
+- Added post key check to edit revert
+
 1.4 (July 12th, 2017)
 - Added minimum time before Edit is logged (Issue #9)
 - Removed PHP closing tags

@@ -11,14 +11,17 @@ if(!defined("IN_MYBB"))
 }
 
 // Neat trick for caching our custom template(s)
-if(THIS_SCRIPT == 'showthread.php')
+if(defined('THIS_SCRIPT'))
 {
-	global $templatelist;
-	if(isset($templatelist))
+	if(THIS_SCRIPT == 'showthread.php')
 	{
-		$templatelist .= ',';
+		global $templatelist;
+		if(isset($templatelist))
+		{
+			$templatelist .= ',';
+		}
+		$templatelist .= 'postbit_edithistory';
 	}
-	$templatelist .= 'postbit_edithistory';
 }
 
 // Tell MyBB when to run the hooks
@@ -53,7 +56,7 @@ function edithistory_info()
 		"website"			=> "http://galaxiesrealm.com/index.php",
 		"author"			=> "Starpaul20",
 		"authorsite"		=> "http://galaxiesrealm.com/index.php",
-		"version"			=> "1.4",
+		"version"			=> "1.6",
 		"codename"			=> "edithistory",
 		"compatibility"		=> "18*"
 	);
@@ -539,7 +542,7 @@ padding: 2px;
 	$db->insert_query("tasks", $subscription_insert);
 
 	// Update templates
-	include MYBB_ROOT."/inc/adminfunctions_templates.php";
+	require_once MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'editedmsg\']}')."#i", '{$post[\'editedmsg\']}{$post[\'edithistory\']}');
 	find_replace_templatesets("postbit_editedby", "#".preg_quote('{$editreason}')."#i", '<!-- editcount -->{$editreason}');
@@ -557,7 +560,7 @@ function edithistory_deactivate()
 	$db->delete_query("tasks", "file='edithistory'");
 	rebuild_settings();
 
-	include MYBB_ROOT."/inc/adminfunctions_templates.php";
+	require_once MYBB_ROOT."/inc/adminfunctions_templates.php";
 	find_replace_templatesets("postbit", "#".preg_quote('{$post[\'edithistory\']}')."#i", '', 0);
 	find_replace_templatesets("postbit_classic", "#".preg_quote('{$post[\'edithistory\']}')."#i", '', 0);
 	find_replace_templatesets("postbit_editedby", "#".preg_quote('<!-- editcount -->')."#i", '', 0);
@@ -584,7 +587,7 @@ function edithistory_run()
 			"originaltext" => $db->escape_string($edit['message']),
 			"subject" => $db->escape_string($edit['subject']),
 			"ipaddress" => $db->escape_binary($session->packedip),
-			"reason" => $db->escape_string($mybb->input['editreason'])
+			"reason" => $db->escape_string($mybb->get_input('editreason'))
 		);
 		$db->insert_query("edithistory", $edit_history);
 
@@ -882,19 +885,19 @@ function edithistory_admin_adminlog($plugin_array)
 	global $lang;
 	$lang->load("tools_edithistory");
 
-	if($plugin_array['lang_string'] == admin_log_tools_edithistory_prune)
+	if($plugin_array['lang_string'] == 'admin_log_tools_edithistory_prune')
 	{
 		if($plugin_array['logitem']['data'][1] && !$plugin_array['logitem']['data'][2])
 		{
-			$plugin_array['lang_string'] = admin_log_tools_edithistory_prune_user;
+			$plugin_array['lang_string'] = 'admin_log_tools_edithistory_prune_user';
 		}
 		elseif($plugin_array['logitem']['data'][2] && !$plugin_array['logitem']['data'][1])
 		{
-			$plugin_array['lang_string'] = admin_log_tools_edithistory_prune_thread;
+			$plugin_array['lang_string'] = 'admin_log_tools_edithistory_prune_thread';
 		}
 		elseif($plugin_array['logitem']['data'][1] && $plugin_array['logitem']['data'][2])
 		{
-			$plugin_array['lang_string'] = admin_log_tools_edithistory_prune_user_thread;
+			$plugin_array['lang_string'] = 'admin_log_tools_edithistory_prune_user_thread';
 		}
 	}
 

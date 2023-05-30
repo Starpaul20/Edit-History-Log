@@ -41,6 +41,8 @@ $thread['subject'] = htmlspecialchars_uni($parser->parse_badwords($thread['subje
 
 $fid = $post['fid'];
 
+$post_errors = '';
+
 // Determine who can see the edit histories
 if($mybb->settings['editmodvisibility'] == 2 && $mybb->usergroup['cancp'] != 1)
 {
@@ -237,6 +239,7 @@ if($mybb->input['action'] == "revert")
 		"subject" => $history['subject'],
 		"edit_uid" => 0,
 		"message" => $history['originaltext'],
+		"editreason" => '',
 	);
 
 	$posthandler->set_data($post);
